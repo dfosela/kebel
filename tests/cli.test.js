@@ -54,3 +54,58 @@ test('kb init delegates to the injected runInit', async () => {
   assert.deepEqual(calls, ['called']);
   assert.match(written, /fake init log line/);
 });
+
+test('kb review --staged delegates to the injected reviewStaged and exits 0 on approval', async () => {
+  const fakeReviewStaged = async () => ({
+    verdict: 'approved',
+    reason: 'looks good',
+    securityFinding: false,
+  });
+  let written = '';
+  const stdout = { write: (s) => { written += s; } };
+
+  const code = await runCli(['review', '--staged'], {
+    version: '0.1.0',
+    stdout,
+    reviewStaged: fakeReviewStaged,
+  });
+
+  assert.equal(code, 0);
+  assert.match(written, /approved/);
+});
+
+test('kb review --staged exits non-zero on rejection', async () => {
+  const fakeReviewStaged = async () => ({
+    verdict: 'rejected',
+    reason: 'missing tests',
+    securityFinding: false,
+  });
+  let written = '';
+  const stdout = { write: (s) => { written += s; } };
+
+  const code = await runCli(['review', '--staged'], {
+    version: '0.1.0',
+    stdout,
+    reviewStaged: fakeReviewStaged,
+  });
+
+  assert.equal(code, 1);
+  assert.match(written, /missing tests/);
+});
+
+test('kb review --staged exits non-zero and prints a clear message when reviewStaged throws', async () => {
+  const fakeReviewStaged = async () => {
+    throw new Error('No hay cambios staged para revisar.');
+  };
+  let written = '';
+  const stdout = { write: (s) => { written += s; } };
+
+  const code = await runCli(['review', '--staged'], {
+    version: '0.1.0',
+    stdout,
+    reviewStaged: fakeReviewStaged,
+  });
+
+  assert.equal(code, 1);
+  assert.match(written, /No hay cambios staged/);
+});

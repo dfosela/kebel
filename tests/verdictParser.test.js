@@ -43,3 +43,29 @@ test('parseVerdict throws when no JSON verdict is found', () => {
 test('parseVerdict throws when the JSON found has no verdict field', () => {
   assert.throws(() => parseVerdict('{"foo": "bar"}'), /veredicto/);
 });
+
+test('parseVerdict falls back to keyword detection for unambiguous free-text approvals (some CLIs ignore the JSON instruction)', () => {
+  const result = parseVerdict(
+    "Apruebo el cambio.\n\nAñade únicamente `app.js` con una salida básica y no hay regresiones.",
+  );
+  assert.equal(result.verdict, 'approved');
+  assert.equal(result.securityFinding, false);
+  assert.match(result.reason, /Apruebo el cambio/);
+});
+
+test('parseVerdict falls back to keyword detection for unambiguous free-text rejections', () => {
+  const result = parseVerdict('Rechazo este diff: expone una API key en texto plano.');
+  assert.equal(result.verdict, 'rejected');
+  assert.equal(result.securityFinding, true);
+});
+
+test('parseVerdict does NOT guess when free text is ambiguous (mentions both or neither keyword)', () => {
+  assert.throws(
+    () => parseVerdict('No tengo información suficiente para decidir sobre esto.'),
+    /veredicto/,
+  );
+  assert.throws(
+    () => parseVerdict('Podría aprobarse, pero también podría rechazarse dependiendo del contexto.'),
+    /veredicto/,
+  );
+});
