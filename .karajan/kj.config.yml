@@ -1,0 +1,14 @@
+# Project-level override — Kebel dogfoods Karajan (kj) to build itself.
+# Fixed cross-AI role assignment (v4 model): brain != reviewer != solomon,
+# three distinct model families. See .karajan/adrs/ for the rationale.
+coder: claude
+reviewer: agy
+roles:
+  coder:
+    provider: claude
+  reviewer:
+    provider: agy
+  solomon:
+    provider: codex
+brain:
+  provider: claude
