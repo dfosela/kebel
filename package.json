@@ -1,5 +1,15 @@
 {
-  "dependencies": {
-    "@huggingface/transformers": "^4.2.0"
+  "name": "kebel",
+  "version": "0.1.0",
+  "description": "Kebel — lite, token-efficient AI dev orchestrator inspired by Karajan Code's method (TDD-first, cross-AI review, real git gates), for people without large AI subscriptions.",
+  "type": "module",
+  "bin": {
+    "kb": "./bin/kb.js"
+  },
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "test": "node --test"
   }
 }
