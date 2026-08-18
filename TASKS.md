@@ -1,0 +1,48 @@
+# Tareas de Kebel
+
+Lista de trabajo del proyecto, sincronizada con el board de Karajan (`kj hu list`)
+mientras se hace dogfooding de Kebel con `kj`. Cada `id` entre backticks es el id
+de la card en el board (`kj hu list` / `kj board`).
+
+**Cómo la mantengo:** cada vez que empiezo, termino o creo una tarea nueva,
+actualizo este archivo en el mismo commit/PR que el trabajo correspondiente
+(pasa de "Pendiente" a "Hecho", o se añade una línea nueva en la sección que
+toque).
+
+**Cómo añades tú tareas a la cola:** escribe una línea nueva bajo
+"Cola del usuario" (formato libre, no hace falta id). Cuando la recoja, creo
+la card real en el board (`kj hu add`) y la muevo a la sección de prioridad
+que corresponda.
+
+## Hecho
+
+- [x] `activate-karajan` — Activar el método Karajan (v4) en este proyecto
+- [x] `kebel-setup` — Setup inicial: estructura, roles de agentes, detección de Squeezr
+- [x] `kb-cli-skeleton` — `kb --version` / `kb --help`
+- [x] `kb-squeezr-setup` — `kb setup`: detección y auto-instalación de Squeezr por defecto
+- [x] `kb-provider-strategy` — ADR: CLIs instaladas vs API directa
+- [x] `kb-init` — `kb init`: detección de proveedores + asignación de roles + Squeezr
+- [x] `kb-review-engine` — `kb review --staged`: motor de revisión cruzada real
+
+## Pendiente — P0 (núcleo innegociable del método)
+
+- [ ] `kb-git-gate` — Gate de git real: bloquear commit sin veredicto válido y con hash del diff intacto
+- [ ] `kb-branch-first` — Bloquear commits directos en la rama base
+- [ ] `kb-tdd-check` — Chequeo TDD-first mínimo viable (tests junto al código)
+- [ ] `kb-security-nonoverridable` — Hallazgos de seguridad no overrideables por Solomon
+- [ ] `kb-solomon` — `kb solomon`: arbitraje de terceros
+
+## Pendiente — P1 (soporte al método)
+
+- [ ] `kb-adr-cmd` — `kb adr add/list`
+- [ ] `kb-card-cmd` — `kb card add/list/move` (tracking plano en CLI, sin servidor)
+- [ ] `kb-doctor` — `kb doctor`: diagnóstico del setup
+
+## Pendiente — P2 (pulido)
+
+- [ ] `kb-npm-publish` — Publicar `kebel` en npm + guía de instalación real
+- [ ] `kb-own-ci` — CI propio de Kebel, separado del meta-tooling de `kj`
+
+## Cola del usuario
+
+_(vacía — añade aquí lo que quieras encolar)_
