@@ -37,3 +37,20 @@ test('kb setup delegates to the injected ensureSqueezr and prints its log lines'
   assert.deepEqual(calls, ['called']);
   assert.match(written, /fake log line/);
 });
+
+test('kb init delegates to the injected runInit', async () => {
+  const calls = [];
+  const fakeRunInit = async ({ log }) => {
+    calls.push('called');
+    log('fake init log line');
+    return { version: 1, roles: { coder: 'claude', reviewer: null, solomon: null } };
+  };
+  let written = '';
+  const stdout = { write: (s) => { written += s; } };
+
+  const code = await runCli(['init'], { version: '0.1.0', stdout, runInit: fakeRunInit });
+
+  assert.equal(code, 0);
+  assert.deepEqual(calls, ['called']);
+  assert.match(written, /fake init log line/);
+});
