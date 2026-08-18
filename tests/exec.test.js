@@ -1,6 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { run } from '../src/exec.js';
+import { mkdtemp, rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import path from 'node:path';
+import { run, runCapture } from '../src/exec.js';
 
 test('run resolves when the command exits 0', async () => {
   await assert.doesNotReject(run(process.execPath, ['-e', 'process.exit(0)']));
@@ -17,6 +20,45 @@ test('run rejects when the command does not exist', async () => {
 test('run rejects with a timeout error instead of hanging past the deadline', async () => {
   await assert.rejects(
     run(process.execPath, ['-e', 'setTimeout(() => {}, 5000)'], { timeoutMs: 200 }),
+    /timed out/,
+  );
+});
+
+test('run executes in the given cwd', async () => {
+  const dir = await mkdtemp(path.join(tmpdir(), 'kebel-exec-cwd-'));
+  try {
+    const marker = path.join(dir, 'ran-here.txt');
+    await run(process.execPath, ['-e', "require('fs').writeFileSync('ran-here.txt', 'ok')"], {
+      cwd: dir,
+    });
+    const { existsSync } = await import('node:fs');
+    assert.ok(existsSync(marker));
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test('runCapture resolves with stdout when the command exits 0', async () => {
+  const result = await runCapture(process.execPath, ['-e', "process.stdout.write('hello')"]);
+  assert.equal(result.stdout, 'hello');
+});
+
+test('runCapture rejects with stdout/stderr attached when the command exits non-zero', async () => {
+  await assert.rejects(
+    runCapture(process.execPath, [
+      '-e',
+      "process.stdout.write('partial'); process.exit(1)",
+    ]),
+    (error) => {
+      assert.equal(error.stdout, 'partial');
+      return true;
+    },
+  );
+});
+
+test('runCapture rejects with a timeout error instead of hanging past the deadline', async () => {
+  await assert.rejects(
+    runCapture(process.execPath, ['-e', 'setTimeout(() => {}, 5000)'], { timeoutMs: 200 }),
     /timed out/,
   );
 });
