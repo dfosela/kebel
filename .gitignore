@@ -17,3 +17,4 @@ node_modules/
 !.karajan/hooks/pre-push
 !.karajan/hooks/post-merge
 !.karajan/adrs/
+!.karajan/kj.config.yml
