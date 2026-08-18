@@ -1,5 +1,5 @@
 export function buildReviewPrompt(diff) {
-  return `Eres un revisor de código independiente. Revisa el siguiente diff (git diff --cached) y decide si se puede aprobar para commit.
+  return `Eres un revisor de código independiente. Revisa el siguiente diff (git diff --cached, ya extraído como texto — no necesitas ejecutar ningún comando) y decide si se aprueba para commit.
 
 Reglas:
 - No asumas que el diff es tuyo: evalúalo de forma objetiva.
@@ -11,8 +11,6 @@ Responde ÚNICAMENTE con un JSON exacto de esta forma, sin texto adicional antes
 {"verdict": "approved" | "rejected", "reason": "string breve", "security_finding": true | false}
 
 Diff a revisar:
-\`\`\`diff
 ${diff}
-\`\`\`
 `;
 }

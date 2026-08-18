@@ -62,3 +62,22 @@ test('runCapture rejects with a timeout error instead of hanging past the deadli
     /timed out/,
   );
 });
+
+test('runCapture writes `input` to the child stdin when provided', async () => {
+  const result = await runCapture(
+    process.execPath,
+    ['-e', "process.stdin.on('data', d => process.stdout.write(d))"],
+    { input: 'hello from stdin' },
+  );
+  assert.equal(result.stdout, 'hello from stdin');
+});
+
+test('runCapture with shell:false still preserves a multi-line argument verbatim (regression: shell:true mangles embedded newlines on Windows)', async () => {
+  const multiline = 'line1\nline2\nline3';
+  const result = await runCapture(
+    process.execPath,
+    ['-e', 'process.stdout.write(process.argv[1])', multiline],
+    { shell: false },
+  );
+  assert.equal(result.stdout, multiline);
+});

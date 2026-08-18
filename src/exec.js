@@ -6,12 +6,19 @@ const DEFAULT_TIMEOUT_MS = 30000;
 // cmd.exe treats whitespace and ()^&|<>%! as metacharacters — quote any
 // argument containing them so `shell: true` doesn't mis-tokenize things
 // like `-e "process.exit(0)"`.
+//
+// IMPORTANT: cmd.exe's command-line parser is line-oriented — a raw
+// newline inside a joined `shell: true` string truncates everything after
+// it (verified: only the first line of a multi-line argument survives).
+// Never route a multi-line argument (e.g. an AI prompt with an embedded
+// diff) through shell:true; use shell:false for a real executable, or
+// `input` (stdin) instead of an argv element.
 function quoteForWindowsShell(value) {
   return /[\s"()^&|<>%!]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
 }
 
-function spawnCommand(command, args, stdio, cwd) {
-  return isWindows
+function spawnCommand(command, args, stdio, cwd, useShell) {
+  return useShell
     ? spawn([command, ...args].map(quoteForWindowsShell).join(' '), { shell: true, stdio, cwd })
     : spawn(command, args, { stdio, cwd });
 }
@@ -30,9 +37,9 @@ function killOnTimeout(child, timeoutMs, onTimeout) {
   }, timeoutMs);
 }
 
-export function run(command, args = [], { timeoutMs = DEFAULT_TIMEOUT_MS, cwd } = {}) {
+export function run(command, args = [], { timeoutMs = DEFAULT_TIMEOUT_MS, cwd, shell = isWindows } = {}) {
   return new Promise((resolve, reject) => {
-    const child = spawnCommand(command, args, 'ignore', cwd);
+    const child = spawnCommand(command, args, 'ignore', cwd, shell);
     let timedOut = false;
     const timer = killOnTimeout(child, timeoutMs, () => {
       timedOut = true;
@@ -55,9 +62,13 @@ export function run(command, args = [], { timeoutMs = DEFAULT_TIMEOUT_MS, cwd } 
   });
 }
 
-export function runCapture(command, args = [], { timeoutMs = DEFAULT_TIMEOUT_MS, cwd } = {}) {
+export function runCapture(
+  command,
+  args = [],
+  { timeoutMs = DEFAULT_TIMEOUT_MS, cwd, shell = isWindows, input } = {},
+) {
   return new Promise((resolve, reject) => {
-    const child = spawnCommand(command, args, ['ignore', 'pipe', 'pipe'], cwd);
+    const child = spawnCommand(command, args, ['pipe', 'pipe', 'pipe'], cwd, shell);
     let stdout = '';
     let stderr = '';
     child.stdout.on('data', (chunk) => {
@@ -66,6 +77,11 @@ export function runCapture(command, args = [], { timeoutMs = DEFAULT_TIMEOUT_MS,
     child.stderr.on('data', (chunk) => {
       stderr += chunk;
     });
+
+    if (input !== undefined) {
+      child.stdin.write(input);
+    }
+    child.stdin.end();
 
     let timedOut = false;
     const timer = killOnTimeout(child, timeoutMs, () => {

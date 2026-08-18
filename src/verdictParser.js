@@ -25,6 +25,28 @@ function extractJsonObjects(text) {
   return candidates;
 }
 
+// "aprobar" is an irregular Spanish verb (apruebo/aprueba, not "aprobo") —
+// match both the stem-changed conjugations and the regular "aprob*" forms.
+const APPROVE_PATTERN = /\b(aprueb\w*|aprob\w*|approved?)\b/i;
+const REJECT_PATTERN = /\b(rechaz\w*|reject\w*)\b/i;
+const SECURITY_PATTERN =
+  /\b(secreto\w*|credencial\w*|vulnerab\w*|inyecci[oó]n\w*|injection|security|api[\s-]?key|token\w*|clave\w*)\b/i;
+
+// Some CLIs (observed with codex) ignore a "respond only with JSON"
+// instruction and answer in free text instead. Only accept an unambiguous
+// signal (approve XOR reject) — anything else falls through to the error
+// below rather than guessing.
+function parseFreeTextVerdict(text) {
+  const approved = APPROVE_PATTERN.test(text);
+  const rejected = REJECT_PATTERN.test(text);
+  if (approved === rejected) return null;
+  return {
+    verdict: approved ? 'approved' : 'rejected',
+    reason: text.trim().slice(0, 500),
+    securityFinding: SECURITY_PATTERN.test(text),
+  };
+}
+
 export function parseVerdict(rawOutput) {
   const candidates = extractJsonObjects(rawOutput);
   for (let i = candidates.length - 1; i >= 0; i--) {
@@ -37,5 +59,9 @@ export function parseVerdict(rawOutput) {
       };
     }
   }
+
+  const fallback = parseFreeTextVerdict(rawOutput);
+  if (fallback) return fallback;
+
   throw new Error('No se encontró un veredicto JSON válido en la respuesta del reviewer.');
 }
