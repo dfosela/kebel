@@ -27,6 +27,10 @@ test('runInit detects providers, assigns roles, writes config, runs Squeezr setu
       if (['claude', 'agy'].includes(cmd)) return;
       throw new Error('not found');
     };
+    const runCapture = async (cmd, args) => {
+      if (cmd === 'git' && args[0] === 'symbolic-ref') return { stdout: 'main\n', stderr: '' };
+      throw new Error(`unexpected runCapture call: ${cmd} ${args.join(' ')}`);
+    };
     const squeezrCalls = [];
     const ensureSqueezr = async () => {
       squeezrCalls.push('called');
@@ -37,6 +41,7 @@ test('runInit detects providers, assigns roles, writes config, runs Squeezr setu
 
     const config = await runInit({
       run,
+      runCapture,
       log: (m) => logs.push(m),
       ensureSqueezr,
       cwd,
@@ -47,6 +52,7 @@ test('runInit detects providers, assigns roles, writes config, runs Squeezr setu
     assert.equal(config.roles.coder, 'claude');
     assert.equal(config.roles.reviewer, 'agy');
     assert.equal(config.roles.solomon, null);
+    assert.equal(config.baseBranch, 'main');
     assert.deepEqual(squeezrCalls, ['called']);
     assert.equal(hookCalls.length, 1);
     assert.equal(typeof hookCalls[0].runCapture, 'function');
@@ -57,6 +63,7 @@ test('runInit detects providers, assigns roles, writes config, runs Squeezr setu
     const saved = JSON.parse(await readFile(path.join(cwd, '.kebel', 'kebel.config.json'), 'utf8'));
     assert.equal(saved.roles.coder, 'claude');
     assert.equal(saved.roles.reviewer, 'agy');
+    assert.equal(saved.baseBranch, 'main');
   });
 });
 
@@ -66,11 +73,15 @@ test('runInit is idempotent: a second run reports the existing config instead of
       if (cmd === 'claude') return;
       throw new Error('not found');
     };
+    const runCapture = async (cmd, args) => {
+      if (cmd === 'git' && args[0] === 'symbolic-ref') return { stdout: 'main\n', stderr: '' };
+      throw new Error(`unexpected runCapture call: ${cmd} ${args.join(' ')}`);
+    };
     const ensureSqueezr = async () => ({ installed: true, configured: true });
     const installPreCommitHook = fakeInstallPreCommitHook([]);
 
-    const first = await runInit({ run, log: () => {}, ensureSqueezr, cwd, installPreCommitHook });
-    const second = await runInit({ run, log: () => {}, ensureSqueezr, cwd, installPreCommitHook });
+    const first = await runInit({ run, runCapture, log: () => {}, ensureSqueezr, cwd, installPreCommitHook });
+    const second = await runInit({ run, runCapture, log: () => {}, ensureSqueezr, cwd, installPreCommitHook });
 
     assert.deepEqual(first, second);
   });

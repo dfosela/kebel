@@ -6,6 +6,7 @@ import path from 'node:path';
 import { evaluateGitGate, checkGitGate } from '../src/gitGate.js';
 import { hashDiff } from '../src/diff.js';
 import { saveVerdict } from '../src/verdictStore.js';
+import { saveConfig } from '../src/kebelConfig.js';
 
 async function withTempDir(fn) {
   const dir = await mkdtemp(path.join(tmpdir(), 'kebel-gate-'));
@@ -50,18 +51,51 @@ test('evaluateGitGate lets an empty staged diff through (nothing to gate)', () =
   assert.equal(result.ok, true);
 });
 
+test('evaluateGitGate blocks a commit directly on the base branch, even with an approved verdict', () => {
+  const diff = 'diff --git a/x b/x\n+hi\n';
+  const verdict = { verdict: 'approved', reason: 'ok', diffHash: hashDiff(diff) };
+  const result = evaluateGitGate({ diff, verdict, currentBranch: 'main', baseBranch: 'main' });
+  assert.equal(result.ok, false);
+  assert.match(result.reason, /Branch-first/);
+  assert.match(result.reason, /main/);
+});
+
+test('evaluateGitGate allows a commit on a feature branch different from the base branch', () => {
+  const diff = 'diff --git a/x b/x\n+hi\n';
+  const verdict = { verdict: 'approved', reason: 'ok', diffHash: hashDiff(diff) };
+  const result = evaluateGitGate({ diff, verdict, currentBranch: 'feat/x', baseBranch: 'main' });
+  assert.equal(result.ok, true);
+});
+
+function fakeRunCapture({ diff, branch }) {
+  return async (cmd, args) => {
+    assert.equal(cmd, 'git');
+    if (args[0] === 'diff') return { stdout: diff, stderr: '' };
+    if (args[0] === 'symbolic-ref') return { stdout: `${branch}\n`, stderr: '' };
+    throw new Error(`unexpected git call: ${args.join(' ')}`);
+  };
+}
+
 test('checkGitGate reads the staged diff and the persisted verdict for the given cwd', async () => {
   await withTempDir(async (cwd) => {
     const diff = 'diff --git a/x b/x\n+hi\n';
     await saveVerdict({ verdict: 'approved', reason: 'ok', diffHash: hashDiff(diff) }, cwd);
-    const runCapture = async (cmd, args) => {
-      assert.equal(cmd, 'git');
-      assert.deepEqual(args, ['diff', '--cached']);
-      return { stdout: diff, stderr: '' };
-    };
 
-    const result = await checkGitGate({ runCapture, cwd });
+    const result = await checkGitGate({ runCapture: fakeRunCapture({ diff, branch: 'feat/x' }), cwd });
 
     assert.equal(result.ok, true);
+  });
+});
+
+test('checkGitGate blocks when the current branch matches the configured base branch', async () => {
+  await withTempDir(async (cwd) => {
+    const diff = 'diff --git a/x b/x\n+hi\n';
+    await saveVerdict({ verdict: 'approved', reason: 'ok', diffHash: hashDiff(diff) }, cwd);
+    await saveConfig({ version: 1, roles: {}, baseBranch: 'main' }, cwd);
+
+    const result = await checkGitGate({ runCapture: fakeRunCapture({ diff, branch: 'main' }), cwd });
+
+    assert.equal(result.ok, false);
+    assert.match(result.reason, /Branch-first/);
   });
 });

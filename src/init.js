@@ -26,11 +26,14 @@ export async function runInit({
   const { warnings, ...roles } = assignRoles(available);
   warnings.forEach((warning) => log(`⚠ ${warning}`));
 
-  const config = { version: 1, roles };
+  const { stdout: branchOut } = await runCapture('git', ['symbolic-ref', '--short', 'HEAD'], { cwd });
+  const baseBranch = branchOut.trim();
+
+  const config = { version: 1, roles, baseBranch };
   await saveConfig(config, cwd);
   log(
     `Kebel inicializado. Roles: coder=${roles.coder ?? '—'}, reviewer=${roles.reviewer ?? '—'}, ` +
-      `solomon=${roles.solomon ?? '—'}.`,
+      `solomon=${roles.solomon ?? '—'}. Rama base: ${baseBranch}.`,
   );
 
   await ensureSqueezr({ run, log });
