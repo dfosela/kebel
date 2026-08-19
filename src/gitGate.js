@@ -1,7 +1,14 @@
 import { getStagedDiff, hashDiff } from './diff.js';
 import { loadVerdict } from './verdictStore.js';
+import { loadConfig } from './kebelConfig.js';
 
-export function evaluateGitGate({ diff, verdict }) {
+export function evaluateGitGate({ diff, verdict, currentBranch, baseBranch }) {
+  if (baseBranch && currentBranch === baseBranch) {
+    return {
+      ok: false,
+      reason: `Branch-first: no se puede commitear directo en la rama base "${baseBranch}". Crea una rama primero.`,
+    };
+  }
   if (!diff.trim()) {
     return { ok: true };
   }
@@ -26,5 +33,8 @@ export function evaluateGitGate({ diff, verdict }) {
 export async function checkGitGate({ runCapture, cwd = process.cwd() }) {
   const diff = await getStagedDiff({ runCapture, cwd });
   const verdict = await loadVerdict(cwd);
-  return evaluateGitGate({ diff, verdict });
+  const { stdout } = await runCapture('git', ['symbolic-ref', '--short', 'HEAD'], { cwd, timeoutMs: 10_000 });
+  const currentBranch = stdout.trim();
+  const config = await loadConfig(cwd);
+  return evaluateGitGate({ diff, verdict, currentBranch, baseBranch: config?.baseBranch });
 }
