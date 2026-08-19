@@ -23,10 +23,10 @@ que corresponda.
 - [x] `kb-provider-strategy` — ADR: CLIs instaladas vs API directa
 - [x] `kb-init` — `kb init`: detección de proveedores + asignación de roles + Squeezr
 - [x] `kb-review-engine` — `kb review --staged`: motor de revisión cruzada real
+- [x] `kb-git-gate` — Gate de git real: bloquear commit sin veredicto válido y con hash del diff intacto
 
 ## Pendiente — P0 (núcleo innegociable del método)
 
-- [ ] `kb-git-gate` — Gate de git real: bloquear commit sin veredicto válido y con hash del diff intacto
 - [ ] `kb-branch-first` — Bloquear commits directos en la rama base
 - [ ] `kb-tdd-check` — Chequeo TDD-first mínimo viable (tests junto al código)
 - [ ] `kb-security-nonoverridable` — Hallazgos de seguridad no overrideables por Solomon
@@ -44,5 +44,6 @@ que corresponda.
 - [ ] `kb-own-ci` — CI propio de Kebel, separado del meta-tooling de `kj`
 
 ## Cola del usuario
+
 
 _(vacía — añade aquí lo que quieras encolar)_
