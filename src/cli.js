@@ -29,6 +29,7 @@ export async function runCli(
     runInit = defaultRunInit,
     reviewStaged = defaultReviewStaged,
     checkGitGate = defaultCheckGitGate,
+    binPath,
   },
 ) {
   if (argv.includes('--version')) {
@@ -45,7 +46,7 @@ export async function runCli(
     return 0;
   }
   if (argv[0] === 'init') {
-    await runInit({ run, log, ensureSqueezr });
+    await runInit({ run, runCapture, log, ensureSqueezr, binPath });
     return 0;
   }
   if (argv[0] === 'review' && argv.includes('--staged')) {
