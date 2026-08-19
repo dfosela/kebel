@@ -4,6 +4,7 @@ import { runInit as defaultRunInit } from './init.js';
 import { reviewStaged as defaultReviewStaged } from './review.js';
 import { checkGitGate as defaultCheckGitGate } from './gitGate.js';
 import { checkTddGate as defaultCheckTddGate } from './tddCheck.js';
+import { runSolomon as defaultRunSolomon } from './solomon.js';
 
 const USAGE = `Usage: kb [command] [options]
 
@@ -11,6 +12,8 @@ Commands:
   init            Detect AI providers, assign coder/reviewer/solomon roles and set up Squeezr
   setup           Detect/install Squeezr and configure it as the default proxy
   review --staged Review the staged diff with the configured reviewer and record a verdict
+  solomon         Arbitrate a rejected review verdict with the configured solomon provider
+                  (refuses to run on a security finding — that is never overridable)
   git-gate-check  Internal: verify the last review verdict still matches the staged diff
                   and that every staged src/ file has a matching tests/ file
                   (used by the pre-commit hook)
@@ -32,6 +35,7 @@ export async function runCli(
     reviewStaged = defaultReviewStaged,
     checkGitGate = defaultCheckGitGate,
     checkTddGate = defaultCheckTddGate,
+    runSolomon = defaultRunSolomon,
     binPath,
   },
 ) {
@@ -57,6 +61,16 @@ export async function runCli(
       const record = await reviewStaged({ runCapture, log });
       const securityNote = record.securityFinding ? ' (hallazgo de seguridad)' : '';
       log(`Veredicto: ${record.verdict}${securityNote} — ${record.reason}`);
+      return record.verdict === 'approved' ? 0 : 1;
+    } catch (error) {
+      log(`Error: ${error.message}`);
+      return 1;
+    }
+  }
+  if (argv[0] === 'solomon') {
+    try {
+      const record = await runSolomon({ runCapture, log });
+      log(`Veredicto de Solomon: ${record.verdict} — ${record.reason}`);
       return record.verdict === 'approved' ? 0 : 1;
     } catch (error) {
       log(`Error: ${error.message}`);

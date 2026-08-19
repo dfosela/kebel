@@ -27,10 +27,7 @@ que corresponda.
 - [x] `kb-branch-first` — Bloquear commits directos en la rama base
 - [x] `kb-tdd-check` — Chequeo TDD-first mínimo viable (tests junto al código)
 - [x] `kb-security-nonoverridable` — Hallazgos de seguridad no overrideables por Solomon
-
-## Pendiente — P0 (núcleo innegociable del método)
-
-- [ ] `kb-solomon` — `kb solomon`: arbitraje de terceros
+- [x] `kb-solomon` — `kb solomon`: arbitraje de terceros
 
 ## Pendiente — P1 (soporte al método)
 
