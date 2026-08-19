@@ -2,6 +2,7 @@ import { ensureSqueezr as defaultEnsureSqueezr } from './squeezr.js';
 import { run as defaultRun, runCapture as defaultRunCapture } from './exec.js';
 import { runInit as defaultRunInit } from './init.js';
 import { reviewStaged as defaultReviewStaged } from './review.js';
+import { checkGitGate as defaultCheckGitGate } from './gitGate.js';
 
 const USAGE = `Usage: kb [command] [options]
 
@@ -9,6 +10,8 @@ Commands:
   init            Detect AI providers, assign coder/reviewer/solomon roles and set up Squeezr
   setup           Detect/install Squeezr and configure it as the default proxy
   review --staged Review the staged diff with the configured reviewer and record a verdict
+  git-gate-check  Internal: verify the last review verdict still matches the staged diff
+                  (used by the pre-commit hook)
 
 Options:
   --version   Print the kb version
@@ -25,6 +28,7 @@ export async function runCli(
     runCapture = defaultRunCapture,
     runInit = defaultRunInit,
     reviewStaged = defaultReviewStaged,
+    checkGitGate = defaultCheckGitGate,
   },
 ) {
   if (argv.includes('--version')) {
@@ -54,6 +58,15 @@ export async function runCli(
       log(`Error: ${error.message}`);
       return 1;
     }
+  }
+  if (argv[0] === 'git-gate-check') {
+    const result = await checkGitGate({ runCapture });
+    if (!result.ok) {
+      log(`✗ Commit bloqueado: ${result.reason}`);
+      return 1;
+    }
+    log('✓ Gate de git: veredicto válido.');
+    return 0;
   }
   stdout.write(USAGE);
   return 0;
