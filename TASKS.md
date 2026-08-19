@@ -26,10 +26,10 @@ que corresponda.
 - [x] `kb-git-gate` — Gate de git real: bloquear commit sin veredicto válido y con hash del diff intacto
 - [x] `kb-branch-first` — Bloquear commits directos en la rama base
 - [x] `kb-tdd-check` — Chequeo TDD-first mínimo viable (tests junto al código)
+- [x] `kb-security-nonoverridable` — Hallazgos de seguridad no overrideables por Solomon
 
 ## Pendiente — P0 (núcleo innegociable del método)
 
-- [ ] `kb-security-nonoverridable` — Hallazgos de seguridad no overrideables por Solomon
 - [ ] `kb-solomon` — `kb solomon`: arbitraje de terceros
 
 ## Pendiente — P1 (soporte al método)

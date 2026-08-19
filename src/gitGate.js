@@ -18,6 +18,12 @@ export function evaluateGitGate({ diff, verdict, currentBranch, baseBranch }) {
       reason: 'No hay veredicto de revisión. Ejecuta "kb review --staged" antes de commitear.',
     };
   }
+  if (verdict.securityFinding) {
+    return {
+      ok: false,
+      reason: `Hallazgo de seguridad: no se puede commitear, ni overridear con arbitraje. ${verdict.reason}`,
+    };
+  }
   if (verdict.verdict !== 'approved') {
     return { ok: false, reason: `El último veredicto fue "${verdict.verdict}": ${verdict.reason}` };
   }
