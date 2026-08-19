@@ -131,3 +131,41 @@ test('kb git-gate-check exits non-zero and prints the reason when the gate rejec
   assert.equal(code, 1);
   assert.match(written, /No hay veredicto de revisión/);
 });
+
+test('kb git-gate-check also runs the injected checkTddGate and blocks on a TDD-first violation', async () => {
+  const fakeCheckGitGate = async () => ({ ok: true });
+  const fakeCheckTddGate = async () => ({ ok: false, reason: 'TDD-first: hay código sin test correspondiente.' });
+  let written = '';
+  const stdout = { write: (s) => { written += s; } };
+
+  const code = await runCli(['git-gate-check'], {
+    version: '0.1.0',
+    stdout,
+    checkGitGate: fakeCheckGitGate,
+    checkTddGate: fakeCheckTddGate,
+  });
+
+  assert.equal(code, 1);
+  assert.match(written, /TDD-first/);
+});
+
+test('kb git-gate-check does not run checkTddGate when checkGitGate already rejects', async () => {
+  const fakeCheckGitGate = async () => ({ ok: false, reason: 'No hay veredicto de revisión.' });
+  const tddCalls = [];
+  const fakeCheckTddGate = async () => {
+    tddCalls.push('called');
+    return { ok: true };
+  };
+  let written = '';
+  const stdout = { write: (s) => { written += s; } };
+
+  const code = await runCli(['git-gate-check'], {
+    version: '0.1.0',
+    stdout,
+    checkGitGate: fakeCheckGitGate,
+    checkTddGate: fakeCheckTddGate,
+  });
+
+  assert.equal(code, 1);
+  assert.deepEqual(tddCalls, []);
+});
