@@ -67,6 +67,40 @@ test('evaluateGitGate allows a commit on a feature branch different from the bas
   assert.equal(result.ok, true);
 });
 
+test('evaluateGitGate blocks a security finding, even when the verdict says "rejected"', () => {
+  const diff = 'diff --git a/x b/x\n+hi\n';
+  const verdict = {
+    verdict: 'rejected',
+    reason: 'hardcoded API key',
+    securityFinding: true,
+    diffHash: hashDiff(diff),
+  };
+  const result = evaluateGitGate({ diff, verdict });
+  assert.equal(result.ok, false);
+  assert.match(result.reason, /seguridad/i);
+  assert.match(result.reason, /hardcoded API key/);
+});
+
+test('evaluateGitGate blocks a security finding even if the verdict was somehow marked "approved" (defense against a tampered or overridden verdict)', () => {
+  const diff = 'diff --git a/x b/x\n+hi\n';
+  const verdict = {
+    verdict: 'approved',
+    reason: 'hardcoded API key',
+    securityFinding: true,
+    diffHash: hashDiff(diff),
+  };
+  const result = evaluateGitGate({ diff, verdict });
+  assert.equal(result.ok, false);
+  assert.match(result.reason, /seguridad/i);
+});
+
+test('evaluateGitGate does not block on securityFinding: false', () => {
+  const diff = 'diff --git a/x b/x\n+hi\n';
+  const verdict = { verdict: 'approved', reason: 'ok', securityFinding: false, diffHash: hashDiff(diff) };
+  const result = evaluateGitGate({ diff, verdict });
+  assert.equal(result.ok, true);
+});
+
 function fakeRunCapture({ diff, branch }) {
   return async (cmd, args) => {
     assert.equal(cmd, 'git');
