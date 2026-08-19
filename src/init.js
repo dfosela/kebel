@@ -1,8 +1,18 @@
 import { detectProviders, assignRoles } from './config.js';
 import { loadConfig, saveConfig } from './kebelConfig.js';
 import { ensureSqueezr as defaultEnsureSqueezr } from './squeezr.js';
+import { runCapture as defaultRunCapture } from './exec.js';
+import { installPreCommitHook as defaultInstallPreCommitHook } from './gitHooks.js';
 
-export async function runInit({ run, log, ensureSqueezr = defaultEnsureSqueezr, cwd = process.cwd() }) {
+export async function runInit({
+  run,
+  runCapture = defaultRunCapture,
+  log,
+  ensureSqueezr = defaultEnsureSqueezr,
+  installPreCommitHook = defaultInstallPreCommitHook,
+  cwd = process.cwd(),
+  binPath,
+}) {
   const existing = await loadConfig(cwd);
   if (existing) {
     log(
@@ -24,6 +34,9 @@ export async function runInit({ run, log, ensureSqueezr = defaultEnsureSqueezr, 
   );
 
   await ensureSqueezr({ run, log });
+
+  const hookPath = await installPreCommitHook({ runCapture, cwd, binPath });
+  log(`Gate de git instalado: ${hookPath}.`);
 
   return config;
 }

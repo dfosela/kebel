@@ -109,3 +109,25 @@ test('kb review --staged exits non-zero and prints a clear message when reviewSt
   assert.equal(code, 1);
   assert.match(written, /No hay cambios staged/);
 });
+
+test('kb git-gate-check exits 0 and confirms when the injected checkGitGate approves', async () => {
+  const fakeCheckGitGate = async () => ({ ok: true });
+  let written = '';
+  const stdout = { write: (s) => { written += s; } };
+
+  const code = await runCli(['git-gate-check'], { version: '0.1.0', stdout, checkGitGate: fakeCheckGitGate });
+
+  assert.equal(code, 0);
+  assert.match(written, /Gate de git/);
+});
+
+test('kb git-gate-check exits non-zero and prints the reason when the gate rejects', async () => {
+  const fakeCheckGitGate = async () => ({ ok: false, reason: 'No hay veredicto de revisión.' });
+  let written = '';
+  const stdout = { write: (s) => { written += s; } };
+
+  const code = await runCli(['git-gate-check'], { version: '0.1.0', stdout, checkGitGate: fakeCheckGitGate });
+
+  assert.equal(code, 1);
+  assert.match(written, /No hay veredicto de revisión/);
+});
