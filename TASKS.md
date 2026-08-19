@@ -25,10 +25,10 @@ que corresponda.
 - [x] `kb-review-engine` — `kb review --staged`: motor de revisión cruzada real
 - [x] `kb-git-gate` — Gate de git real: bloquear commit sin veredicto válido y con hash del diff intacto
 - [x] `kb-branch-first` — Bloquear commits directos en la rama base
+- [x] `kb-tdd-check` — Chequeo TDD-first mínimo viable (tests junto al código)
 
 ## Pendiente — P0 (núcleo innegociable del método)
 
-- [ ] `kb-tdd-check` — Chequeo TDD-first mínimo viable (tests junto al código)
 - [ ] `kb-security-nonoverridable` — Hallazgos de seguridad no overrideables por Solomon
 - [ ] `kb-solomon` — `kb solomon`: arbitraje de terceros
 

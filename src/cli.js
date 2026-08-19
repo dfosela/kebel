@@ -3,6 +3,7 @@ import { run as defaultRun, runCapture as defaultRunCapture } from './exec.js';
 import { runInit as defaultRunInit } from './init.js';
 import { reviewStaged as defaultReviewStaged } from './review.js';
 import { checkGitGate as defaultCheckGitGate } from './gitGate.js';
+import { checkTddGate as defaultCheckTddGate } from './tddCheck.js';
 
 const USAGE = `Usage: kb [command] [options]
 
@@ -11,6 +12,7 @@ Commands:
   setup           Detect/install Squeezr and configure it as the default proxy
   review --staged Review the staged diff with the configured reviewer and record a verdict
   git-gate-check  Internal: verify the last review verdict still matches the staged diff
+                  and that every staged src/ file has a matching tests/ file
                   (used by the pre-commit hook)
 
 Options:
@@ -29,6 +31,7 @@ export async function runCli(
     runInit = defaultRunInit,
     reviewStaged = defaultReviewStaged,
     checkGitGate = defaultCheckGitGate,
+    checkTddGate = defaultCheckTddGate,
     binPath,
   },
 ) {
@@ -61,9 +64,14 @@ export async function runCli(
     }
   }
   if (argv[0] === 'git-gate-check') {
-    const result = await checkGitGate({ runCapture });
-    if (!result.ok) {
-      log(`✗ Commit bloqueado: ${result.reason}`);
+    const gateResult = await checkGitGate({ runCapture });
+    if (!gateResult.ok) {
+      log(`✗ Commit bloqueado: ${gateResult.reason}`);
+      return 1;
+    }
+    const tddResult = await checkTddGate({ runCapture });
+    if (!tddResult.ok) {
+      log(`✗ Commit bloqueado: ${tddResult.reason}`);
       return 1;
     }
     log('✓ Gate de git: veredicto válido.');
