@@ -41,9 +41,10 @@ que corresponda.
 ## Pendiente — P2 (pulido)
 
 - [ ] `kb-npm-publish` — Publicar `kebel` en npm + guía de instalación real
-- [ ] `kb-own-ci` — CI propio de Kebel, separado del meta-tooling de `kj`
 - [ ] `hu_plan-20260818103052-bwhw_019` — Landing page de Kebel: qué es y cómo
-  instalarlo (colores/diseño visual se deciden al llegar a la tarea)
+  instalarlo (colores/diseño visual se deciden al llegar a la tarea; depende
+  de `kb-npm-publish` para tener una instalación real que documentar)
+- [ ] `kb-own-ci` — CI propio de Kebel, separado del meta-tooling de `kj`
 
 ## Cola del usuario
 
