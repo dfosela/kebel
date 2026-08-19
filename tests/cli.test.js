@@ -110,6 +110,41 @@ test('kb review --staged exits non-zero and prints a clear message when reviewSt
   assert.match(written, /No hay cambios staged/);
 });
 
+test('kb solomon delegates to the injected runSolomon and exits 0 on approval', async () => {
+  const fakeRunSolomon = async () => ({ verdict: 'approved', reason: 'false alarm', solomon: true });
+  let written = '';
+  const stdout = { write: (s) => { written += s; } };
+
+  const code = await runCli(['solomon'], { version: '0.1.0', stdout, runSolomon: fakeRunSolomon });
+
+  assert.equal(code, 0);
+  assert.match(written, /approved/);
+});
+
+test('kb solomon exits non-zero on a sustained rejection', async () => {
+  const fakeRunSolomon = async () => ({ verdict: 'rejected', reason: 'rejection upheld' });
+  let written = '';
+  const stdout = { write: (s) => { written += s; } };
+
+  const code = await runCli(['solomon'], { version: '0.1.0', stdout, runSolomon: fakeRunSolomon });
+
+  assert.equal(code, 1);
+  assert.match(written, /rejection upheld/);
+});
+
+test('kb solomon exits non-zero and prints a clear message when runSolomon throws (e.g. a security finding)', async () => {
+  const fakeRunSolomon = async () => {
+    throw new Error('Hallazgo de seguridad: no se puede arbitrar, ni con Solomon.');
+  };
+  let written = '';
+  const stdout = { write: (s) => { written += s; } };
+
+  const code = await runCli(['solomon'], { version: '0.1.0', stdout, runSolomon: fakeRunSolomon });
+
+  assert.equal(code, 1);
+  assert.match(written, /Hallazgo de seguridad/);
+});
+
 test('kb git-gate-check exits 0 and confirms when the injected checkGitGate approves', async () => {
   const fakeCheckGitGate = async () => ({ ok: true });
   let written = '';

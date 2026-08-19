@@ -60,7 +60,8 @@ familias de modelo distintas:
 - **brain/coder → Claude** — escribe el código, TDD first.
 - **reviewer → Antigravity (Gemini)** — revisa cada diff, nunca el suyo propio.
 - **solomon → Codex** — arbitra solo cuando el brain discrepa de un rechazo
-  del reviewer; su veredicto se obedece salvo en hallazgos de seguridad.
+  del reviewer (`kb solomon`); su veredicto se obedece salvo en hallazgos de
+  seguridad, que nunca son overrideables.
 
 Detalle completo en `.karajan/adrs/0001-*.md`.
 
