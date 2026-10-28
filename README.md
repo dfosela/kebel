@@ -26,6 +26,32 @@ Aunque el alcance es reducido, el método no se recorta:
 
 Ver `.karajan/adrs/` para las decisiones de arquitectura registradas.
 
+## Lo que Kebel SÍ recorta (filosofía lite)
+
+Karajan tiene piezas pensadas para equipos/proyectos grandes que Kebel
+deliberadamente **no** replica, porque el público de Kebel no las necesita
+y cada una cuesta tokens, infraestructura o fricción de setup:
+
+- **Sin servidor ni dashboard** — las cards de Kebel viven en un `.kebel/cards.json`
+  plano (`kb card add/list/move`), no en un board compartido con backend.
+- **Sin RAG semántico ni base vectorial** — nada equivalente a `kj rag index/query`;
+  Kebel no indexa el repo, confía en que el modelo lea el código directamente.
+- **Sin Sonar/Semgrep/OSV-Scanner por defecto** — ni Docker como dependencia
+  implícita del flujo de revisión; la revisión cruzada (`kb review --staged`)
+  es la capa de calidad, no un análisis estático adicional.
+- **Sin policy-as-code ni gobierno con firma móvil** — un solo archivo de
+  config por proyecto (`.kebel/kebel.config.json`), sin excepciones temporales
+  que haya que auditar.
+- **Sin lanes/worktrees aislados** — se trabaja rama a rama en el checkout
+  normal; no hay `kj worktree start/done` equivalente.
+- **Sin roles adicionales** (planner, researcher, tester, security, triage...)
+  — solo los tres imprescindibles para la revisión cruzada: coder, reviewer,
+  solomon.
+
+Si al construir una tarea de Kebel la implementación natural se parece a
+alguna de estas piezas de Karajan, es una señal de que se está sobre-construyendo:
+hay que decirlo y simplificar antes de escribir código.
+
 ## Uso
 
 ```sh
