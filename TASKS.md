@@ -31,12 +31,12 @@ que corresponda.
 - [x] `kb-security-nonoverridable` — Hallazgos de seguridad no overrideables por Solomon
 - [x] `kb-solomon` — `kb solomon`: arbitraje de terceros
 - [x] `kb-adr-cmd` — `kb adr add/list`
+- [x] `kb-card-cmd` — `kb card add/list/move` (tracking plano en CLI, sin
+  servidor; cubre también tener visible qué tarea está en curso y en qué
+  orden van las demás, y poder encolar/quitar tareas)
 
 ## Pendiente — P1 (soporte al método)
 
-- [ ] `kb-card-cmd` — `kb card add/list/move` (tracking plano en CLI, sin
-  servidor; cubre también tener visible qué tarea está en curso y en qué
-  orden van las demás, y poder encolar/quitar tareas)
 - [ ] `kb-doctor` — `kb doctor`: diagnóstico del setup (incluye comprobar que
   el user está logado en los 3 proveedores de IA asignados, no solo que el
   CLI esté instalado)
