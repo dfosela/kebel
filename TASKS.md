@@ -30,10 +30,10 @@ que corresponda.
 - [x] `kb-tdd-check` — Chequeo TDD-first mínimo viable (tests junto al código)
 - [x] `kb-security-nonoverridable` — Hallazgos de seguridad no overrideables por Solomon
 - [x] `kb-solomon` — `kb solomon`: arbitraje de terceros
+- [x] `kb-adr-cmd` — `kb adr add/list`
 
 ## Pendiente — P1 (soporte al método)
 
-- [ ] `kb-adr-cmd` — `kb adr add/list`
 - [ ] `kb-card-cmd` — `kb card add/list/move` (tracking plano en CLI, sin
   servidor; cubre también tener visible qué tarea está en curso y en qué
   orden van las demás, y poder encolar/quitar tareas)
@@ -51,7 +51,7 @@ que corresponda.
 
 - [ ] `kb-npm-publish` — Publicar `kebel` en npm + guía de instalación real
 - [ ] `hu_plan-20260818103052-bwhw_019` — Landing page de Kebel: qué es y cómo
-  instalarlo (colores/diseño visual se deciden al llegar a la tarea; depende
+  instalarlo (colores de daniel.fosela.com y el diseño visual se deciden al llegar a la tarea; depende
   de `kb-npm-publish` para tener una instalación real que documentar)
 - [ ] `kb-own-ci` — CI propio de Kebel, separado del meta-tooling de `kj`
 - [ ] `kb-project-context` — Un `PROJECT.md` (o similar) con la importancia y
