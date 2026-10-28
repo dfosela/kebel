@@ -7,7 +7,9 @@ de la card en el board (`kj hu list` / `kj board`).
 **Cómo la mantengo:** cada vez que empiezo, termino o creo una tarea nueva,
 actualizo este archivo en el mismo commit/PR que el trabajo correspondiente
 (pasa de "Pendiente" a "Hecho", o se añade una línea nueva en la sección que
-toque).
+toque). Además, cada vez que termino una tarea reviso la sección "Cola del
+usuario": si hay algo nuevo, lo convierto en card(s) real(es) y lo coloco en
+la sección de prioridad que corresponda, para que quede listo para hacerse.
 
 **Cómo añades tú tareas a la cola:** escribe una línea nueva bajo
 "Cola del usuario" (formato libre, no hace falta id). Cuando la recoja, creo
@@ -32,8 +34,18 @@ que corresponda.
 ## Pendiente — P1 (soporte al método)
 
 - [ ] `kb-adr-cmd` — `kb adr add/list`
-- [ ] `kb-card-cmd` — `kb card add/list/move` (tracking plano en CLI, sin servidor)
-- [ ] `kb-doctor` — `kb doctor`: diagnóstico del setup
+- [ ] `kb-card-cmd` — `kb card add/list/move` (tracking plano en CLI, sin
+  servidor; cubre también tener visible qué tarea está en curso y en qué
+  orden van las demás, y poder encolar/quitar tareas)
+- [ ] `kb-doctor` — `kb doctor`: diagnóstico del setup (incluye comprobar que
+  el user está logado en los 3 proveedores de IA asignados, no solo que el
+  CLI esté instalado)
+- [ ] `kb-init-scaffold` — `kb init` crea el scaffolding de proyecto (archivos
+  de config equivalentes a los que genera Karajan) y, si un proveedor
+  asignado a un rol no está logado, reasigna ese rol a Claude automáticamente
+  en vez de dejarlo vacío
+- [ ] `kb-onboarding-msg` — `kb init` imprime una explicación corta de los 3
+  roles de IA y de cómo funciona `TASKS.md` para quien se instala Kebel
 
 ## Pendiente — P2 (pulido)
 
@@ -42,8 +54,10 @@ que corresponda.
   instalarlo (colores/diseño visual se deciden al llegar a la tarea; depende
   de `kb-npm-publish` para tener una instalación real que documentar)
 - [ ] `kb-own-ci` — CI propio de Kebel, separado del meta-tooling de `kj`
+- [ ] `kb-project-context` — Un `PROJECT.md` (o similar) con la importancia y
+  el contexto del proyecto en el que se usa Kebel, auto-mantenido a medida
+  que se trabaja (formato y momento de actualización a decidir vía ADR)
 
 ## Cola del usuario
-
 
 _(vacía — añade aquí lo que quieras encolar)_

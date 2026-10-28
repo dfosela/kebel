@@ -22,3 +22,4 @@ node_modules/
 !.karajan/hooks/post-merge
 !.karajan/adrs/
 !.karajan/kj.config.yml
+.karajan/identity.local.yml
