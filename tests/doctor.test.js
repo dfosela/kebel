@@ -59,6 +59,22 @@ test('checkProvider classifies an authentication failure from the minimal prompt
   assert.match(result.reason, /logado/i);
 });
 
+test('checkProvider reads the auth error from stderr, not just error.message', async () => {
+  const result = await checkProvider({
+    provider: 'codex',
+    run: async () => {},
+    runCapture: async () => {
+      throw Object.assign(new Error('codex exec exited with code 1'), {
+        stderr: 'ERROR: unexpected status 401 Unauthorized: missing scopes',
+        stdout: '',
+      });
+    },
+  });
+
+  assert.equal(result.ok, false);
+  assert.match(result.reason, /logado/i);
+});
+
 test('runDoctor reports a missing config without checking providers', async () => {
   await withTempDir(async (cwd) => {
     const result = await runDoctor({ run: async () => {}, runCapture: async () => ({ stdout: '' }), cwd });

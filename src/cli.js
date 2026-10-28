@@ -12,6 +12,8 @@ import {
   moveCard as defaultMoveCard,
   parseCardAddArgs,
 } from './card.js';
+import { runDoctor as defaultRunDoctor } from './doctor.js';
+import { formatDoctorReport, isDoctorHealthy } from './doctorFormat.js';
 
 const USAGE = `Usage: kb [command] [options]
 
@@ -29,6 +31,8 @@ Commands:
   card list       List every tracked card, in the order they were added
   card move <id> <status>
                   Move a card to pending/running/done/skipped
+  doctor          Diagnose the setup: git, config, every assigned AI provider
+                  (login included, not just that the binary exists) and Squeezr
   git-gate-check  Internal: verify the last review verdict still matches the staged diff
                   and that every staged src/ file has a matching tests/ file
                   (used by the pre-commit hook)
@@ -56,6 +60,7 @@ export async function runCli(
     addCard = defaultAddCard,
     listCards = defaultListCards,
     moveCard = defaultMoveCard,
+    runDoctor = defaultRunDoctor,
     binPath,
   },
 ) {
@@ -154,6 +159,11 @@ export async function runCli(
       log(`Error: ${error.message}`);
       return 1;
     }
+  }
+  if (argv[0] === 'doctor') {
+    const results = await runDoctor({ runCapture });
+    formatDoctorReport(results).forEach((line) => log(line));
+    return isDoctorHealthy(results) ? 0 : 1;
   }
   if (argv[0] === 'git-gate-check') {
     const gateResult = await checkGitGate({ runCapture });

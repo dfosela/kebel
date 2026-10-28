@@ -34,12 +34,12 @@ que corresponda.
 - [x] `kb-card-cmd` — `kb card add/list/move` (tracking plano en CLI, sin
   servidor; cubre también tener visible qué tarea está en curso y en qué
   orden van las demás, y poder encolar/quitar tareas)
+- [x] `kb-doctor` — `kb doctor`: diagnóstico del setup (incluye comprobar que
+  el user está logado en los 3 proveedores de IA asignados, no solo que el
+  CLI esté instalado)
 
 ## Pendiente — P1 (soporte al método)
 
-- [ ] `kb-doctor` — `kb doctor`: diagnóstico del setup (incluye comprobar que
-  el user está logado en los 3 proveedores de IA asignados, no solo que el
-  CLI esté instalado)
 - [ ] `kb-init-scaffold` — `kb init` crea el scaffolding de proyecto (archivos
   de config equivalentes a los que genera Karajan) y, si un proveedor
   asignado a un rol no está logado, reasigna ese rol a Claude automáticamente
