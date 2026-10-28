@@ -6,6 +6,12 @@ import { checkGitGate as defaultCheckGitGate } from './gitGate.js';
 import { checkTddGate as defaultCheckTddGate } from './tddCheck.js';
 import { runSolomon as defaultRunSolomon } from './solomon.js';
 import { addAdr as defaultAddAdr, listAdrs as defaultListAdrs, parseAdrAddArgs } from './adr.js';
+import {
+  addCard as defaultAddCard,
+  listCards as defaultListCards,
+  moveCard as defaultMoveCard,
+  parseCardAddArgs,
+} from './card.js';
 
 const USAGE = `Usage: kb [command] [options]
 
@@ -18,6 +24,11 @@ Commands:
   adr add <title> [--context ...] [--decision ...] [--consequences ...]
                   Record a lightweight ADR under .kebel/adrs/
   adr list        List the recorded ADRs
+  card add <title> [--id <id>]
+                  Track a new card under .kebel/cards.json (pending by default)
+  card list       List every tracked card, in the order they were added
+  card move <id> <status>
+                  Move a card to pending/running/done/skipped
   git-gate-check  Internal: verify the last review verdict still matches the staged diff
                   and that every staged src/ file has a matching tests/ file
                   (used by the pre-commit hook)
@@ -42,6 +53,9 @@ export async function runCli(
     runSolomon = defaultRunSolomon,
     addAdr = defaultAddAdr,
     listAdrs = defaultListAdrs,
+    addCard = defaultAddCard,
+    listCards = defaultListCards,
+    moveCard = defaultMoveCard,
     binPath,
   },
 ) {
@@ -101,6 +115,45 @@ export async function runCli(
     }
     adrs.forEach((adr) => log(`${adr.filename} — [${adr.status}] ${adr.title} (${adr.date})`));
     return 0;
+  }
+  if (argv[0] === 'card' && argv[1] === 'add') {
+    const { title, id } = parseCardAddArgs(argv.slice(2));
+    if (!title) {
+      log('Error: falta el título de la card. Uso: kb card add "<título>" [--id "<id>"]');
+      return 1;
+    }
+    try {
+      const card = await addCard({ title, id: id || undefined });
+      log(`Card creada: ${card.id} [${card.status}] ${card.title}`);
+      return 0;
+    } catch (error) {
+      log(`Error: ${error.message}`);
+      return 1;
+    }
+  }
+  if (argv[0] === 'card' && argv[1] === 'list') {
+    const cards = await listCards({});
+    if (cards.length === 0) {
+      log('No hay cards todavía. Usa "kb card add <título>" para crear una.');
+      return 0;
+    }
+    cards.forEach((card) => log(`${card.id} [${card.status}] ${card.title}`));
+    return 0;
+  }
+  if (argv[0] === 'card' && argv[1] === 'move') {
+    const [, , id, status] = argv;
+    if (!id || !status) {
+      log('Error: uso: kb card move <id> <pending|running|done|skipped>');
+      return 1;
+    }
+    try {
+      const card = await moveCard({ id, status });
+      log(`${card.id} → ${card.status}`);
+      return 0;
+    } catch (error) {
+      log(`Error: ${error.message}`);
+      return 1;
+    }
   }
   if (argv[0] === 'git-gate-check') {
     const gateResult = await checkGitGate({ runCapture });

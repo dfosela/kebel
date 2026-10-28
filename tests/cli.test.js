@@ -198,6 +198,123 @@ test('kb adr list prints a helpful message when there are no ADRs yet', async ()
   assert.match(written, /No hay ADRs/);
 });
 
+test('kb card add delegates to the injected addCard with the parsed title and id', async () => {
+  const calls = [];
+  const fakeAddCard = async (opts) => {
+    calls.push(opts);
+    return { id: 'kb-doctor', status: 'pending', title: 'kb doctor' };
+  };
+  let written = '';
+  const stdout = { write: (s) => { written += s; } };
+
+  const code = await runCli(['card', 'add', 'kb', 'doctor', '--id', 'kb-doctor'], {
+    version: '0.1.0',
+    stdout,
+    addCard: fakeAddCard,
+  });
+
+  assert.equal(code, 0);
+  assert.deepEqual(calls, [{ title: 'kb doctor', id: 'kb-doctor' }]);
+  assert.match(written, /kb-doctor/);
+});
+
+test('kb card add exits non-zero with a clear message when no title is given', async () => {
+  let written = '';
+  const stdout = { write: (s) => { written += s; } };
+
+  const code = await runCli(['card', 'add'], { version: '0.1.0', stdout });
+
+  assert.equal(code, 1);
+  assert.match(written, /título/);
+});
+
+test('kb card add exits non-zero and prints the error when addCard rejects (e.g. a duplicate id)', async () => {
+  const fakeAddCard = async () => {
+    throw new Error('Ya existe una card con id "kb-doctor".');
+  };
+  let written = '';
+  const stdout = { write: (s) => { written += s; } };
+
+  const code = await runCli(['card', 'add', 'kb', 'doctor', '--id', 'kb-doctor'], {
+    version: '0.1.0',
+    stdout,
+    addCard: fakeAddCard,
+  });
+
+  assert.equal(code, 1);
+  assert.match(written, /Ya existe/);
+});
+
+test('kb card list prints every card from the injected listCards', async () => {
+  const fakeListCards = async () => [{ id: 'kb-doctor', status: 'pending', title: 'kb doctor' }];
+  let written = '';
+  const stdout = { write: (s) => { written += s; } };
+
+  const code = await runCli(['card', 'list'], { version: '0.1.0', stdout, listCards: fakeListCards });
+
+  assert.equal(code, 0);
+  assert.match(written, /kb-doctor/);
+  assert.match(written, /pending/);
+});
+
+test('kb card list prints a helpful message when there are no cards yet', async () => {
+  const fakeListCards = async () => [];
+  let written = '';
+  const stdout = { write: (s) => { written += s; } };
+
+  const code = await runCli(['card', 'list'], { version: '0.1.0', stdout, listCards: fakeListCards });
+
+  assert.equal(code, 0);
+  assert.match(written, /No hay cards/);
+});
+
+test('kb card move delegates to the injected moveCard with the given id and status', async () => {
+  const calls = [];
+  const fakeMoveCard = async (opts) => {
+    calls.push(opts);
+    return { id: 'kb-doctor', status: 'running' };
+  };
+  let written = '';
+  const stdout = { write: (s) => { written += s; } };
+
+  const code = await runCli(['card', 'move', 'kb-doctor', 'running'], {
+    version: '0.1.0',
+    stdout,
+    moveCard: fakeMoveCard,
+  });
+
+  assert.equal(code, 0);
+  assert.deepEqual(calls, [{ id: 'kb-doctor', status: 'running' }]);
+  assert.match(written, /running/);
+});
+
+test('kb card move exits non-zero with a clear message when id or status is missing', async () => {
+  let written = '';
+  const stdout = { write: (s) => { written += s; } };
+
+  const code = await runCli(['card', 'move', 'kb-doctor'], { version: '0.1.0', stdout });
+
+  assert.equal(code, 1);
+  assert.match(written, /uso/i);
+});
+
+test('kb card move exits non-zero and prints the error when moveCard rejects (e.g. an unknown status)', async () => {
+  const fakeMoveCard = async () => {
+    throw new Error('Estado desconocido "bogus".');
+  };
+  let written = '';
+  const stdout = { write: (s) => { written += s; } };
+
+  const code = await runCli(['card', 'move', 'kb-doctor', 'bogus'], {
+    version: '0.1.0',
+    stdout,
+    moveCard: fakeMoveCard,
+  });
+
+  assert.equal(code, 1);
+  assert.match(written, /Estado desconocido/);
+});
+
 test('kb git-gate-check exits 0 and confirms when the injected checkGitGate approves', async () => {
   const fakeCheckGitGate = async () => ({ ok: true });
   let written = '';
