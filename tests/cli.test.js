@@ -315,6 +315,39 @@ test('kb card move exits non-zero and prints the error when moveCard rejects (e.
   assert.match(written, /Estado desconocido/);
 });
 
+test('kb doctor prints the formatted report and exits 0 when everything is healthy', async () => {
+  const fakeRunDoctor = async () => ({
+    git: { ok: true },
+    config: { ok: true },
+    providers: [{ role: 'coder', provider: 'claude', ok: true }],
+    squeezr: { ok: true },
+  });
+  let written = '';
+  const stdout = { write: (s) => { written += s; } };
+
+  const code = await runCli(['doctor'], { version: '0.1.0', stdout, runDoctor: fakeRunDoctor });
+
+  assert.equal(code, 0);
+  assert.match(written, /git disponible/);
+  assert.match(written, /coder/);
+});
+
+test('kb doctor exits non-zero when a provider check fails', async () => {
+  const fakeRunDoctor = async () => ({
+    git: { ok: true },
+    config: { ok: true },
+    providers: [{ role: 'reviewer', provider: 'agy', ok: false, reason: 'no parece estar logado' }],
+    squeezr: { ok: true },
+  });
+  let written = '';
+  const stdout = { write: (s) => { written += s; } };
+
+  const code = await runCli(['doctor'], { version: '0.1.0', stdout, runDoctor: fakeRunDoctor });
+
+  assert.equal(code, 1);
+  assert.match(written, /no parece estar logado/);
+});
+
 test('kb git-gate-check exits 0 and confirms when the injected checkGitGate approves', async () => {
   const fakeCheckGitGate = async () => ({ ok: true });
   let written = '';

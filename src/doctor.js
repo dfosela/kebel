@@ -27,10 +27,11 @@ export async function checkProvider({ provider, run, runCapture }) {
   const input = invocation.promptVia === 'stdin' ? PING_PROMPT : undefined;
 
   try {
-    await runCapture(provider, args, { timeoutMs: 30_000, shell: invocation.shell, input });
+    await runCapture(provider, args, { timeoutMs: 60_000, shell: invocation.shell, input });
     return { provider, ok: true };
   } catch (error) {
-    return { provider, ok: false, reason: classifyProviderError(error.message) };
+    const detail = [error.stderr, error.stdout, error.message].filter(Boolean).join('\n');
+    return { provider, ok: false, reason: classifyProviderError(detail) };
   }
 }
 

@@ -12,6 +12,10 @@ test('classifyProviderError falls back to the raw message for unrelated failures
   assert.match(classifyProviderError('connection timed out'), /connection timed out/);
 });
 
+test('classifyProviderError collapses multi-line stderr output into one line', () => {
+  assert.equal(classifyProviderError('line one\nline two\n  line three'), 'line one line two line three');
+});
+
 test('formatDoctorReport reports a missing config and stops there', () => {
   const lines = formatDoctorReport({
     git: { ok: true },

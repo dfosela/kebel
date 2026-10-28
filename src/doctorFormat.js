@@ -4,7 +4,8 @@ export function classifyProviderError(message) {
   if (AUTH_ERROR_PATTERN.test(message ?? '')) {
     return 'no parece estar logado (la CLI devolvió un error relacionado con autenticación)';
   }
-  return message ?? 'fallo desconocido al invocar la CLI';
+  if (!message) return 'fallo desconocido al invocar la CLI';
+  return message.replace(/\s+/g, ' ').trim();
 }
 
 export function formatDoctorReport(results) {
