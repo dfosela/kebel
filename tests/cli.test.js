@@ -145,6 +145,59 @@ test('kb solomon exits non-zero and prints a clear message when runSolomon throw
   assert.match(written, /Hallazgo de seguridad/);
 });
 
+test('kb adr add delegates to the injected addAdr with the parsed title and flags', async () => {
+  const calls = [];
+  const fakeAddAdr = async (opts) => {
+    calls.push(opts);
+    return { filename: '0001-use-subprocess-clis.md' };
+  };
+  let written = '';
+  const stdout = { write: (s) => { written += s; } };
+
+  const code = await runCli(['adr', 'add', 'Use', 'subprocess', 'CLIs', '--context', 'why'], {
+    version: '0.1.0',
+    stdout,
+    addAdr: fakeAddAdr,
+  });
+
+  assert.equal(code, 0);
+  assert.deepEqual(calls, [{ title: 'Use subprocess CLIs', context: 'why', decision: '', consequences: '' }]);
+  assert.match(written, /0001-use-subprocess-clis\.md/);
+});
+
+test('kb adr add exits non-zero with a clear message when no title is given', async () => {
+  let written = '';
+  const stdout = { write: (s) => { written += s; } };
+
+  const code = await runCli(['adr', 'add'], { version: '0.1.0', stdout });
+
+  assert.equal(code, 1);
+  assert.match(written, /título/);
+});
+
+test('kb adr list prints every ADR from the injected listAdrs', async () => {
+  const fakeListAdrs = async () => [{ filename: '0001-foo.md', title: 'Foo', status: 'proposed', date: '2026-08-18' }];
+  let written = '';
+  const stdout = { write: (s) => { written += s; } };
+
+  const code = await runCli(['adr', 'list'], { version: '0.1.0', stdout, listAdrs: fakeListAdrs });
+
+  assert.equal(code, 0);
+  assert.match(written, /0001-foo\.md/);
+  assert.match(written, /Foo/);
+});
+
+test('kb adr list prints a helpful message when there are no ADRs yet', async () => {
+  const fakeListAdrs = async () => [];
+  let written = '';
+  const stdout = { write: (s) => { written += s; } };
+
+  const code = await runCli(['adr', 'list'], { version: '0.1.0', stdout, listAdrs: fakeListAdrs });
+
+  assert.equal(code, 0);
+  assert.match(written, /No hay ADRs/);
+});
+
 test('kb git-gate-check exits 0 and confirms when the injected checkGitGate approves', async () => {
   const fakeCheckGitGate = async () => ({ ok: true });
   let written = '';
