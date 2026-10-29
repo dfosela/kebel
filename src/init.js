@@ -3,6 +3,7 @@ import { loadConfig, saveConfig } from './kebelConfig.js';
 import { ensureSqueezr as defaultEnsureSqueezr } from './squeezr.js';
 import { runCapture as defaultRunCapture } from './exec.js';
 import { installPreCommitHook as defaultInstallPreCommitHook } from './gitHooks.js';
+import { writeScaffoldFiles as defaultWriteScaffoldFiles } from './scaffold.js';
 
 export async function runInit({
   run,
@@ -10,6 +11,7 @@ export async function runInit({
   log,
   ensureSqueezr = defaultEnsureSqueezr,
   installPreCommitHook = defaultInstallPreCommitHook,
+  writeScaffoldFiles = defaultWriteScaffoldFiles,
   cwd = process.cwd(),
   binPath,
 }) {
@@ -40,6 +42,11 @@ export async function runInit({
 
   const hookPath = await installPreCommitHook({ runCapture, cwd, binPath });
   log(`Gate de git instalado: ${hookPath}.`);
+
+  const scaffoldResults = await writeScaffoldFiles({ roles, cwd });
+  scaffoldResults
+    .filter((result) => result.written)
+    .forEach((result) => log(`Scaffold creado: ${result.filename}.`));
 
   return config;
 }
