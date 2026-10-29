@@ -1,6 +1,5 @@
 
 node_modules/
-.next/
 
 # Kebel's own runtime config (only relevant if kb init is ever run
 # against this repo itself, e.g. while manually testing kb)
