@@ -48,11 +48,13 @@ que corresponda.
   fallan, sin preguntar), pide un resumen en lenguaje llano al coder y
   pregunta al usuario si aprueba (veredicto `reviewer: "human"`) en vez de
   bloquear sin alternativa
+- [x] `kb-onboarding-msg` — `kb init` imprime una explicación corta de los 3
+  roles de IA y de los comandos básicos (`kb review`, `kb card`, `kb adr`,
+  `kb doctor`) para quien se instala Kebel
 
 ## Pendiente — P1 (soporte al método)
 
-- [ ] `kb-onboarding-msg` — `kb init` imprime una explicación corta de los 3
-  roles de IA y de cómo funciona `TASKS.md` para quien se instala Kebel
+_(vacía — todo el bloque de soporte al método está completo)_
 
 ## Pendiente — P2 (pulido)
 

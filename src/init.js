@@ -4,6 +4,7 @@ import { ensureSqueezr as defaultEnsureSqueezr } from './squeezr.js';
 import { runCapture as defaultRunCapture } from './exec.js';
 import { installPreCommitHook as defaultInstallPreCommitHook } from './gitHooks.js';
 import { writeScaffoldFiles as defaultWriteScaffoldFiles } from './scaffold.js';
+import { buildOnboardingMessage } from './onboarding.js';
 
 export async function runInit({
   run,
@@ -47,6 +48,8 @@ export async function runInit({
   scaffoldResults
     .filter((result) => result.written)
     .forEach((result) => log(`Scaffold creado: ${result.filename}.`));
+
+  log(buildOnboardingMessage({ roles }));
 
   return config;
 }
