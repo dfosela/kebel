@@ -1,6 +1,6 @@
 {
   "name": "kebel",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Kebel — lite, token-efficient AI dev orchestrator inspired by Karajan Code's method (TDD-first, cross-AI review, real git gates), for people without large AI subscriptions.",
   "type": "module",
   "bin": {
