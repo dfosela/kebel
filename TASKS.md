@@ -80,21 +80,17 @@ _(vacía — todo el bloque de soporte al método está completo)_
     (actualmente Bricolage Grotesque/Instrument Sans/JetBrains Mono).
   - Rigor: sin tests automáticos — es HTML/CSS/JS de marketing sin build,
     no el CLI de Kebel; se valida con QA visual manual en el navegador.
-  - Logo real: `img/kebel-logo.png`, sustituye al SVG de hormiga dibujado a
-    mano en navbar/footer, y se usa también como favicon.
+  - Logo real: `img/kebel-logo.png` (redondo), sustituye al SVG de hormiga
+    dibujado a mano en navbar/footer, y se usa también como favicon.
   - HTML revisado para semántica (el bloque de comando de instalación es
     `<figure>`/`<figcaption>`, no `<div>`; el resto de `<div>` que quedan
     son contenedores de layout puro sin equivalente semántico mejor).
-  - **Pendiente de que el usuario revise lo construido hasta ahora** antes
-    de seguir — parado aquí a propósito, sin continuar con más tareas.
-  - Qué queda después de esa revisión:
-    - Rellenar el contenido real de la Parte 2 (ahora mismo todo son
-      marcadores de posición: "título de sección", "descripción", roles
-      con "nombre del modelo" genérico, etc.) con los roles/comandos
-      reales de Kebel.
+  - Contenido real de toda la página ya escrito (texto del user, metáfora
+    del hormiguero) — sin marcadores de posición.
+  - Qué queda:
     - Confirmar la tipografía real del portfolio.
     - QA visual completo en navegador (la intro de hormigas+letras, el
-      modo oscuro, reduced-motion, móvil).
+      modo oscuro, reduced-motion, móvil) — el user lo está revisando.
 - [ ] `kb-npm-publish` — Publicar `kebel` en npm + guía de instalación real
   (último paso, cuando la landing ya esté lista)
 - [ ] `kb-own-ci` — CI propio de Kebel, separado del meta-tooling de `kj`
