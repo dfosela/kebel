@@ -83,7 +83,7 @@ body.is-revealed .nav { transform: none; }
 .nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 14px; }
 .logo { font-family: var(--font-display); font-weight: 800; font-size: 1.3rem; letter-spacing: -0.02em; text-decoration: none; }
 .logo { display: inline-flex; align-items: center; color: var(--ink); }
-.ant-logo { width: 32px; height: 32px; display: block; object-fit: contain; transition: transform .35s cubic-bezier(.2,.7,.2,1); }
+.ant-logo { width: 32px; height: 32px; display: block; object-fit: cover; border-radius: 50%; transition: transform .35s cubic-bezier(.2,.7,.2,1); }
 .logo:hover .ant-logo { transform: translateX(4px) rotate(-4deg); }
 .foot .logo { color: var(--band-fg); }
 @media (prefers-reduced-motion: reduce) { .ant-logo { transition: none; } }
