@@ -70,6 +70,8 @@ test('runInit detects providers, assigns roles, writes config, runs Squeezr setu
     assert.deepEqual(scaffoldCalls[0].roles, config.roles);
     assert.equal(scaffoldCalls[0].cwd, cwd);
     assert.match(logs.join('\n'), /AGENTS\.md/);
+    assert.match(logs.join('\n'), /Bienvenido a Kebel/);
+    assert.match(logs.join('\n'), /kb card/);
 
     const saved = JSON.parse(await readFile(path.join(cwd, '.kebel', 'kebel.config.json'), 'utf8'));
     assert.equal(saved.roles.coder, 'claude');
