@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Kebel</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Kebel, un orquestador de IA ligero. Claude dirige, Gemini revisa y Codex decide.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="nav" id="nav">
+  <div class="wrap nav-inner">
+    <a class="logo" href="#hero" aria-label="Kebel, volver al inicio">
+      <svg class="ant-logo" viewBox="0 0 40 28" fill="none" aria-hidden="true">
+        <g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.5 19 6.5 15.5 3M22 16.5 19 21.5 15.5 25M19.5 12 15 8.5 10.5 7M19.5 16 15 19.5 10.5 21M24.5 12l2.5-5 3.5-2.5M24.5 16l2.5 5 3.5 2.5"/>
+          <path d="M33.5 12.5 36 8.5 39 8M33.5 15.5 36 19.5 39 20"/>
+        </g>
+        <ellipse cx="9" cy="14" rx="8" ry="5.4" fill="currentColor"/>
+        <circle cx="17.6" cy="14" r="1.6" fill="currentColor"/>
+        <ellipse cx="23" cy="14" rx="4.4" ry="2.8" fill="currentColor"/>
+        <ellipse cx="31" cy="14" rx="3.4" ry="3.5" fill="currentColor"/>
+      </svg>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#instalar">enlace a sección</a></li>
+      <li><a href="#que-es">enlace a sección</a></li>
+      <li><a href="#flujo">enlace a sección</a></li>
+      <li><a class="nav-cta" href="#instalar">enlace a npm →</a></li>
+    </ul>
+  </div>
+</header>
+
+<section class="hero" id="hero">
+  <canvas id="scene" aria-hidden="true"></canvas>
+  <h1 class="sr-only">Kebel</h1>
+  <div class="fallback-mark" aria-hidden="true"><span>K</span><span>E</span><span>B</span><span>E</span><span>L</span></div>
+  <div class="hero-copy">
+    <p class="hero-lead">descripción</p>
+    <a class="scroll-cue" href="#instalar">scroll
+      <svg width="12" height="14" viewBox="0 0 12 14" fill="none" aria-hidden="true"><path d="M6 1v11M1.5 7.5 6 12l4.5-4.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
+  </div>
+  <button class="skip" id="skip" type="button">Saltar intro</button>
+</section>
+
+<main>
+  <section class="block install" id="instalar">
+    <div class="wrap">
+      <p class="eyebrow">etiqueta de sección</p>
+      <h2>título de instalación.</h2>
+      <p class="lede">descripción breve de la instalación</p>
+      <div class="install-grid">
+        <div class="cmd">
+          <div class="cmd-bar"><span>terminal</span><button class="copy" id="copyCmd" type="button">copiar</button></div>
+          <pre><code id="cmdText"><span class="prompt">$</span> comando de instalación (npm install …)</code></pre>
+        </div>
+        <ol class="install-steps">
+          <li><span class="step-num">Paso 01</span><p>instrucción 1</p></li>
+          <li><span class="step-num">Paso 02</span><p>instrucción 2</p></li>
+          <li><span class="step-num">Paso 03</span><p>instrucción 3</p></li>
+        </ol>
+      </div>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="#instalar">enlace a npm →</a>
+        <a class="btn btn-ghost" href="#instalar">enlace a documentación</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="que-es">
+    <div class="wrap">
+      <p class="eyebrow">etiqueta de sección</p>
+      <h2>título de la sección.</h2>
+      <p class="lede">descripción</p>
+      <ul class="roles">
+        <li>
+          <p class="role-tag"><span>rol</span><span>verbo</span></p>
+          <h3>nombre del modelo</h3>
+          <p>descripción del rol</p>
+        </li>
+        <li>
+          <p class="role-tag"><span>rol</span><span>verbo</span></p>
+          <h3>nombre del modelo</h3>
+          <p>descripción del rol</p>
+        </li>
+        <li>
+          <p class="role-tag"><span>rol</span><span>verbo</span></p>
+          <h3>nombre del modelo</h3>
+          <p>descripción del rol</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="block band" id="flujo">
+    <div class="wrap">
+      <p class="eyebrow">etiqueta de sección</p>
+      <h2>título del flujo.</h2>
+      <p class="lede">descripción</p>
+      <div class="track" aria-hidden="true">
+        <svg class="walker" viewBox="0 0 26 18" fill="none">
+          <g stroke="currentColor" stroke-width="1.1" stroke-linecap="round">
+            <path d="M14 7 11 2M14 11l-3 5M11.5 7.5 8 3M11.5 10.5 8 15M16 7.5l3-4.5M16 10.5l3 4.5M21.5 8l3-3M21.5 10l3 3"/>
+          </g>
+          <ellipse cx="6.5" cy="9" rx="5" ry="3.4" fill="currentColor"/>
+          <ellipse cx="14.5" cy="9" rx="3" ry="2" fill="currentColor"/>
+          <ellipse cx="20" cy="9" rx="2.3" ry="2.4" fill="currentColor"/>
+        </svg>
+      </div>
+      <ol class="steps">
+        <li><p class="step-num">Paso 01</p><h3>título del paso</h3><p>descripción del paso</p></li>
+        <li><p class="step-num">Paso 02</p><h3>título del paso</h3><p>descripción del paso</p></li>
+        <li><p class="step-num">Paso 03</p><h3>título del paso</h3><p>descripción del paso</p></li>
+        <li><p class="step-num">Paso 04</p><h3>título del paso</h3><p>descripción del paso</p></li>
+      </ol>
+      <p class="loop-note">nota de cierre del flujo</p>
+    </div>
+  </section>
+
+  <section class="block" id="por-que">
+    <div class="wrap">
+      <p class="eyebrow">etiqueta de sección</p>
+      <h2>título de la sección.</h2>
+      <p class="lede">descripción</p>
+      <div class="features">
+        <article class="feature"><div class="ico ico-ph" aria-hidden="true">icono</div><h3>característica</h3><p>descripción de la característica</p></article>
+        <article class="feature"><div class="ico ico-ph" aria-hidden="true">icono</div><h3>característica</h3><p>descripción de la característica</p></article>
+        <article class="feature"><div class="ico ico-ph" aria-hidden="true">icono</div><h3>característica</h3><p>descripción de la característica</p></article>
+        <article class="feature"><div class="ico ico-ph" aria-hidden="true">icono</div><h3>característica</h3><p>descripción de la característica</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="block cta" id="contacto">
+    <div class="wrap">
+      <p class="eyebrow">etiqueta de sección</p>
+      <h2>título de llamada a la acción.</h2>
+      <p class="lede">descripción</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="#contacto">enlace a GitHub →</a>
+        <a class="btn btn-ghost" href="#contacto">enlace al portfolio</a>
+      </div>
+      <p class="mail">email de contacto</p>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <a class="logo" href="#hero" aria-label="Kebel, volver al inicio">
+      <svg class="ant-logo" viewBox="0 0 40 28" fill="none" aria-hidden="true">
+        <g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.5 19 6.5 15.5 3M22 16.5 19 21.5 15.5 25M19.5 12 15 8.5 10.5 7M19.5 16 15 19.5 10.5 21M24.5 12l2.5-5 3.5-2.5M24.5 16l2.5 5 3.5 2.5"/>
+          <path d="M33.5 12.5 36 8.5 39 8M33.5 15.5 36 19.5 39 20"/>
+        </g>
+        <ellipse cx="9" cy="14" rx="8" ry="5.4" fill="currentColor"/>
+        <circle cx="17.6" cy="14" r="1.6" fill="currentColor"/>
+        <ellipse cx="23" cy="14" rx="4.4" ry="2.8" fill="currentColor"/>
+        <ellipse cx="31" cy="14" rx="3.4" ry="3.5" fill="currentColor"/>
+      </svg>
+    </a>
+    <nav aria-label="Secciones">
+      <a href="#instalar">enlace a sección</a>
+      <a href="#que-es">enlace a sección</a>
+      <a href="#flujo">enlace a sección</a>
+      <a href="#contacto">enlace externo</a>
+    </nav>
+    <small>© año · autor</small>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
