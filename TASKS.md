@@ -63,32 +63,38 @@ _(vacía — todo el bloque de soporte al método está completo)_
 - [ ] `hu_plan-20260818103052-bwhw_019` — Landing page de Kebel (va antes de
   `kb-npm-publish` — no queremos que nadie pueda instalarlo hasta que todo
   esté listo, y publicar en npm lo hace instalable al instante, con web o
-  sin ella). Spec completa: intro animada en three.js (hormigas que montan
-  el logo "KEBEL") + web informativa con el estilo de daniel.fosela.com.
-  Decisiones ya tomadas:
-  - Repo: dentro de este mismo (`apps/landing/`), como hace Karajan en su
-    propio repo — proyecto Next.js (App Router) + TypeScript aislado, con
-    su propio `package.json`, excluido del `"files"` que se publica a npm.
+  sin ella). Intro animada en three.js (hormigas que montan el logo
+  "KEBEL") + web informativa con el estilo de daniel.fosela.com.
+  **Cambio de arquitectura (29/10):** se descartó el scaffold Next.js +
+  TypeScript + React Three Fiber que se empezó a construir — Karajan
+  también sirve su landing como HTML/CSS/JS plano (`apps/landing/` en su
+  repo, sin build), y el usuario aportó una versión ya construida así, más
+  completa que lo que llevábamos (coreografía de letras, física de empuje
+  del ratón, estado "calm" tras montar el logo, `prefers-reduced-motion`,
+  fallback sin WebGL, modo oscuro). Se adoptó esa base, dividida en
+  `index.html` / `style.css` / `script.js` dentro de `apps/landing/`.
+  Decisiones vigentes:
+  - Repo: dentro de este mismo (`apps/landing/`), sin build ni frameworks.
   - Paleta: exactamente la de daniel.fosela.com (valores reales ya en
-    `apps/landing/app/globals.css`). Tipografía real todavía pendiente de
-    confirmar (marcador de posición `system-ui` mientras tanto).
-  - Rigor: tests reales para la lógica pura y testeable (generación de la
-    curva/ruido del camino de las hormigas, jitter aleatorio de las letras,
-    detección de `reduced-motion`, escalado responsive); QA visual manual
-    para lo estético (geometría/aspecto de las hormigas, sensación del
-    rebote, etc.) — eso no es testeable de forma significativa con TDD.
-  - Orden de construcción por fases, cada una su propio PR:
-    1. [x] Scaffold del proyecto Next.js + paleta extraída.
-    2. Geometría y movimiento de las hormigas (curva + ruido, con tests) —
-       en curso: camino ondulado (`lib/ants/path.ts`) ya hecho y testeado;
-       falta la geometría de la hormiga y la animación de las patas.
-    3. Coreografía de las letras K-E-B-E-L (recogida/transporte/depósito).
-    4. Loop infinito + `prefers-reduced-motion` + presupuesto de rendimiento
-       (DPR, pausa fuera de viewport, menos hormigas en móvil, botón
-       "saltar intro").
-    5. Parte 2 (web informativa): navbar, qué es, cómo funciona,
-       características, stack, CTA final, footer — una sección por commit.
-    6. Pulido final + README de la carpeta `apps/landing/`.
+    `style.css`). Tipografía real todavía pendiente de confirmar
+    (actualmente Bricolage Grotesque/Instrument Sans/JetBrains Mono).
+  - Rigor: sin tests automáticos — es HTML/CSS/JS de marketing sin build,
+    no el CLI de Kebel; se valida con QA visual manual en el navegador.
+  - Logo real: `img/kebel-logo.png`, sustituye al SVG de hormiga dibujado a
+    mano en navbar/footer, y se usa también como favicon.
+  - HTML revisado para semántica (el bloque de comando de instalación es
+    `<figure>`/`<figcaption>`, no `<div>`; el resto de `<div>` que quedan
+    son contenedores de layout puro sin equivalente semántico mejor).
+  - **Pendiente de que el usuario revise lo construido hasta ahora** antes
+    de seguir — parado aquí a propósito, sin continuar con más tareas.
+  - Qué queda después de esa revisión:
+    - Rellenar el contenido real de la Parte 2 (ahora mismo todo son
+      marcadores de posición: "título de sección", "descripción", roles
+      con "nombre del modelo" genérico, etc.) con los roles/comandos
+      reales de Kebel.
+    - Confirmar la tipografía real del portfolio.
+    - QA visual completo en navegador (la intro de hormigas+letras, el
+      modo oscuro, reduced-motion, móvil).
 - [ ] `kb-npm-publish` — Publicar `kebel` en npm + guía de instalación real
   (último paso, cuando la landing ya esté lista)
 - [ ] `kb-own-ci` — CI propio de Kebel, separado del meta-tooling de `kj`
