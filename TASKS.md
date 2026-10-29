@@ -60,10 +60,37 @@ _(vacía — todo el bloque de soporte al método está completo)_
 
 ## Pendiente — P2 (pulido)
 
+- [ ] `hu_plan-20260818103052-bwhw_019` — Landing page de Kebel (va antes de
+  `kb-npm-publish` — no queremos que nadie pueda instalarlo hasta que todo
+  esté listo, y publicar en npm lo hace instalable al instante, con web o
+  sin ella). Spec completa: intro animada en three.js (hormigas que montan
+  el logo "KEBEL") + web informativa con el estilo de daniel.fosela.com.
+  Decisiones ya tomadas:
+  - Repo: dentro de este mismo (`apps/landing/`), como hace Karajan en su
+    propio repo — proyecto Next.js (App Router) + TypeScript aislado, con
+    su propio `package.json`, excluido del `"files"` que se publica a npm.
+  - Paleta y tipografía: exactamente las de daniel.fosela.com (sin colores
+    nuevos fuera de esa paleta). Pendiente: extraer los valores CSS reales
+    (bloqueado — el fetch disponible convierte la página a texto y pierde
+    el CSS; hace falta que el user pase los valores o un acceso que sirva
+    el HTML/CSS crudo).
+  - Rigor: tests reales para la lógica pura y testeable (generación de la
+    curva/ruido del camino de las hormigas, jitter aleatorio de las letras,
+    detección de `reduced-motion`, escalado responsive); QA visual manual
+    para lo estético (geometría/aspecto de las hormigas, sensación del
+    rebote, etc.) — eso no es testeable de forma significativa con TDD.
+  - Orden de construcción por fases, cada una su propio PR:
+    1. Scaffold del proyecto Next.js + paleta/tipografía extraídas.
+    2. Geometría y movimiento de las hormigas (curva + ruido, con tests).
+    3. Coreografía de las letras K-E-B-E-L (recogida/transporte/depósito).
+    4. Loop infinito + `prefers-reduced-motion` + presupuesto de rendimiento
+       (DPR, pausa fuera de viewport, menos hormigas en móvil, botón
+       "saltar intro").
+    5. Parte 2 (web informativa): navbar, qué es, cómo funciona,
+       características, stack, CTA final, footer — una sección por commit.
+    6. Pulido final + README de la carpeta `apps/landing/`.
 - [ ] `kb-npm-publish` — Publicar `kebel` en npm + guía de instalación real
-- [ ] `hu_plan-20260818103052-bwhw_019` — Landing page de Kebel: qué es y cómo
-  instalarlo (colores de daniel.fosela.com y el diseño visual se deciden al llegar a la tarea; depende
-  de `kb-npm-publish` para tener una instalación real que documentar)
+  (último paso, cuando la landing ya esté lista)
 - [ ] `kb-own-ci` — CI propio de Kebel, separado del meta-tooling de `kj`
 - [ ] `kb-project-context` — Un `PROJECT.md` (o similar) con la importancia y
   el contexto del proyecto en el que se usa Kebel, auto-mantenido a medida
