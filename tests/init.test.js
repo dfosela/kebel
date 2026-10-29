@@ -29,6 +29,7 @@ test('runInit detects providers, assigns roles, writes config, runs Squeezr setu
     };
     const runCapture = async (cmd, args) => {
       if (cmd === 'git' && args[0] === 'symbolic-ref') return { stdout: 'main\n', stderr: '' };
+      if (cmd === 'claude' || cmd === 'agy') return { stdout: 'pong', stderr: '' };
       throw new Error(`unexpected runCapture call: ${cmd} ${args.join(' ')}`);
     };
     const squeezrCalls = [];
@@ -75,6 +76,7 @@ test('runInit is idempotent: a second run reports the existing config instead of
     };
     const runCapture = async (cmd, args) => {
       if (cmd === 'git' && args[0] === 'symbolic-ref') return { stdout: 'main\n', stderr: '' };
+      if (cmd === 'claude') return { stdout: 'pong', stderr: '' };
       throw new Error(`unexpected runCapture call: ${cmd} ${args.join(' ')}`);
     };
     const ensureSqueezr = async () => ({ installed: true, configured: true });

@@ -1,13 +1,12 @@
+import { checkProvider as defaultCheckProvider } from './doctor.js';
+
 export const KNOWN_PROVIDERS = ['claude', 'codex', 'gemini', 'agy'];
 
-export async function detectProviders({ run }) {
+export async function detectProviders({ run, runCapture, checkProvider = defaultCheckProvider }) {
   const results = await Promise.all(
     KNOWN_PROVIDERS.map(async (name) => {
-      const available = await run(name, ['--version'], { timeoutMs: 10_000 }).then(
-        () => true,
-        () => false,
-      );
-      return available ? name : null;
+      const { ok } = await checkProvider({ provider: name, run, runCapture });
+      return ok ? name : null;
     }),
   );
   return results.filter(Boolean);

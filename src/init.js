@@ -22,7 +22,7 @@ export async function runInit({
     return existing;
   }
 
-  const available = await detectProviders({ run });
+  const available = await detectProviders({ run, runCapture });
   const { warnings, ...roles } = assignRoles(available);
   warnings.forEach((warning) => log(`⚠ ${warning}`));
 
