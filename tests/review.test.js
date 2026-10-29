@@ -67,11 +67,55 @@ test('reviewStaged throws a clear error when there is no staged diff', async () 
   });
 });
 
-test('reviewStaged throws a clear error when no reviewer is configured or given', async () => {
+test('reviewStaged falls back to human approval when no reviewer is configured, rejecting immediately if tests fail', async () => {
   await withTempDir(async (cwd) => {
-    const runCapture = async () => assert.fail('should not be called');
+    await saveConfig({ version: 1, roles: { coder: 'claude', reviewer: null, solomon: null } }, cwd);
+    const runCapture = async (cmd) => (cmd === 'git' ? { stdout: 'diff --git a/x b/x\n+hi\n', stderr: '' } : assert.fail('unexpected call'));
+    const runProjectTests = async () => ({ ok: false, ran: true, reason: 'Los tests del proyecto fallan.' });
+    const summarizeDiff = async () => assert.fail('should not summarize when tests already failed');
+    const askHumanApproval = async () => assert.fail('should not ask when tests already failed');
 
-    await assert.rejects(reviewStaged({ runCapture, cwd, log: () => {} }), /reviewer/i);
+    const record = await reviewStaged({ runCapture, cwd, log: () => {}, runProjectTests, summarizeDiff, askHumanApproval });
+
+    assert.equal(record.verdict, 'rejected');
+    assert.equal(record.reviewer, 'human');
+    assert.match(record.reason, /fallan/);
+  });
+});
+
+test('reviewStaged asks the human for approval, with a coder-generated summary, when tests pass and no reviewer is configured', async () => {
+  await withTempDir(async (cwd) => {
+    await saveConfig({ version: 1, roles: { coder: 'claude', reviewer: null, solomon: null } }, cwd);
+    const runCapture = async (cmd) => (cmd === 'git' ? { stdout: 'diff --git a/x b/x\n+hi\n', stderr: '' } : assert.fail('unexpected call'));
+    const runProjectTests = async () => ({ ok: true, ran: true, output: 'all green' });
+    const summarizeCalls = [];
+    const summarizeDiff = async (opts) => {
+      summarizeCalls.push(opts);
+      return 'Añade una función de saludo.';
+    };
+    const askHumanApproval = async () => true;
+
+    const record = await reviewStaged({ runCapture, cwd, log: () => {}, runProjectTests, summarizeDiff, askHumanApproval });
+
+    assert.equal(record.verdict, 'approved');
+    assert.equal(record.reviewer, 'human');
+    assert.match(record.reason, /Añade una función de saludo\./);
+    assert.deepEqual(summarizeCalls, [{ runCapture, cwd, provider: 'claude', diff: 'diff --git a/x b/x\n+hi\n' }]);
+  });
+});
+
+test('reviewStaged records a rejected verdict when the human declines', async () => {
+  await withTempDir(async (cwd) => {
+    await saveConfig({ version: 1, roles: { coder: 'claude', reviewer: null, solomon: null } }, cwd);
+    const runCapture = async (cmd) => (cmd === 'git' ? { stdout: 'diff --git a/x b/x\n+hi\n', stderr: '' } : assert.fail('unexpected call'));
+    const runProjectTests = async () => ({ ok: true, ran: true });
+    const summarizeDiff = async () => 'resumen';
+    const askHumanApproval = async () => false;
+
+    const record = await reviewStaged({ runCapture, cwd, log: () => {}, runProjectTests, summarizeDiff, askHumanApproval });
+
+    assert.equal(record.verdict, 'rejected');
+    assert.equal(record.reviewer, 'human');
   });
 });
 

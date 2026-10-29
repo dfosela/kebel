@@ -19,6 +19,11 @@ Aunque el alcance es reducido, el método no se recorta:
 - **Revisión cruzada obligatoria en cada commit** — un modelo distinto al que
   escribió el código lo revisa antes de entrar (`kj review --staged` en este
   repo mientras se construye Kebel; el propio Kebel exigirá el equivalente).
+  Si solo hay una IA logada, `kb review --staged` nunca la hace revisarse a
+  sí misma: corre los tests del proyecto (rechaza directo si fallan) y pide
+  la aprobación explícita del usuario, con un resumen del diff en lenguaje
+  llano generado por esa misma IA — el veredicto queda marcado como
+  `reviewer: "human"`, nunca disfrazado de revisión por IA.
 - **Hallazgos de seguridad no overrideables**, ni siquiera en arbitraje.
 - **Branch-first** — la rama base solo se mueve vía PR.
 - **Gate de git real** — sin veredicto de revisión válido y con el hash del
