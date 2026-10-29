@@ -43,13 +43,14 @@ que corresponda.
   fallback automático a Claude: siempre colisiona con `coder`, que ya es
   Claude cuando está disponible — ver `kb-human-review-fallback` para el
   caso de tener solo un proveedor)
+- [x] `kb-human-review-fallback` — `kb review --staged`: si no hay un segundo
+  proveedor de IA logado, corre los tests del proyecto (rechaza directo si
+  fallan, sin preguntar), pide un resumen en lenguaje llano al coder y
+  pregunta al usuario si aprueba (veredicto `reviewer: "human"`) en vez de
+  bloquear sin alternativa
 
 ## Pendiente — P1 (soporte al método)
 
-- [ ] `kb-human-review-fallback` — `kb review --staged`: si no hay un segundo
-  proveedor de IA logado, corre los tests del proyecto, pide un resumen del
-  diff al coder y pregunta al usuario si aprueba (veredicto `reviewer: "human"`)
-  en vez de bloquear sin alternativa
 - [ ] `kb-onboarding-msg` — `kb init` imprime una explicación corta de los 3
   roles de IA y de cómo funciona `TASKS.md` para quien se instala Kebel
 
