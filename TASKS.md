@@ -37,13 +37,19 @@ que corresponda.
 - [x] `kb-doctor` — `kb doctor`: diagnóstico del setup (incluye comprobar que
   el user está logado en los 3 proveedores de IA asignados, no solo que el
   CLI esté instalado)
+- [x] `kb-init-scaffold` — `kb init` crea `AGENTS.md`/`CLAUDE.md` (si no
+  existen ya) con los roles y convenciones del proyecto, y detecta cada
+  proveedor por login real, no solo por binario instalado (se descartó el
+  fallback automático a Claude: siempre colisiona con `coder`, que ya es
+  Claude cuando está disponible — ver `kb-human-review-fallback` para el
+  caso de tener solo un proveedor)
 
 ## Pendiente — P1 (soporte al método)
 
-- [ ] `kb-init-scaffold` — `kb init` crea el scaffolding de proyecto (archivos
-  de config equivalentes a los que genera Karajan) y, si un proveedor
-  asignado a un rol no está logado, reasigna ese rol a Claude automáticamente
-  en vez de dejarlo vacío
+- [ ] `kb-human-review-fallback` — `kb review --staged`: si no hay un segundo
+  proveedor de IA logado, corre los tests del proyecto, pide un resumen del
+  diff al coder y pregunta al usuario si aprueba (veredicto `reviewer: "human"`)
+  en vez de bloquear sin alternativa
 - [ ] `kb-onboarding-msg` — `kb init` imprime una explicación corta de los 3
   roles de IA y de cómo funciona `TASKS.md` para quien se instala Kebel
 

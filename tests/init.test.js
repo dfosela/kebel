@@ -39,6 +39,11 @@ test('runInit detects providers, assigns roles, writes config, runs Squeezr setu
     };
     const hookCalls = [];
     const logs = [];
+    const scaffoldCalls = [];
+    const writeScaffoldFiles = async (opts) => {
+      scaffoldCalls.push(opts);
+      return [{ filename: 'AGENTS.md', written: true }, { filename: 'CLAUDE.md', written: true }];
+    };
 
     const config = await runInit({
       run,
@@ -48,6 +53,7 @@ test('runInit detects providers, assigns roles, writes config, runs Squeezr setu
       cwd,
       binPath: '/repo/bin/kb.js',
       installPreCommitHook: fakeInstallPreCommitHook(hookCalls),
+      writeScaffoldFiles,
     });
 
     assert.equal(config.roles.coder, 'claude');
@@ -60,6 +66,10 @@ test('runInit detects providers, assigns roles, writes config, runs Squeezr setu
     assert.equal(hookCalls[0].cwd, cwd);
     assert.equal(hookCalls[0].binPath, '/repo/bin/kb.js');
     assert.match(logs.join('\n'), /pre-commit/);
+    assert.equal(scaffoldCalls.length, 1);
+    assert.deepEqual(scaffoldCalls[0].roles, config.roles);
+    assert.equal(scaffoldCalls[0].cwd, cwd);
+    assert.match(logs.join('\n'), /AGENTS\.md/);
 
     const saved = JSON.parse(await readFile(path.join(cwd, '.kebel', 'kebel.config.json'), 'utf8'));
     assert.equal(saved.roles.coder, 'claude');
