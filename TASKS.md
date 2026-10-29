@@ -51,6 +51,8 @@ que corresponda.
 - [x] `kb-onboarding-msg` — `kb init` imprime una explicación corta de los 3
   roles de IA y de los comandos básicos (`kb review`, `kb card`, `kb adr`,
   `kb doctor`) para quien se instala Kebel
+- [x] `kb-versioning` — Versionado semántico (`package.json`) + `CHANGELOG.md`,
+  para ver el progreso en cambios grandes y pequeños
 
 ## Pendiente — P1 (soporte al método)
 

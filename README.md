@@ -67,6 +67,13 @@ node bin/kb.js setup
 
 (Aún no publicado en npm — en desarrollo activo.)
 
+## Versionado
+
+Semántico (`MAJOR.MINOR.PATCH`): MAJOR si algo rompe compatibilidad (formato
+de `.kebel/kebel.config.json`, flags de `kb`...), MINOR cuando se completa
+una tarea/feature nueva de `TASKS.md`, PATCH para fixes sin funcionalidad
+nueva. Historial completo en [`CHANGELOG.md`](CHANGELOG.md).
+
 ## Squeezr, integrado por defecto
 
 [Squeezr](https://www.squeezr.es/) es un proxy local que comprime el
