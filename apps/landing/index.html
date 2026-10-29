@@ -10,22 +10,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <link rel="stylesheet" href="style.css">
+<link rel="icon" href="img/kebel-logo.png">
 </head>
 <body>
 
 <header class="nav" id="nav">
   <div class="wrap nav-inner">
     <a class="logo" href="#hero" aria-label="Kebel, volver al inicio">
-      <svg class="ant-logo" viewBox="0 0 40 28" fill="none" aria-hidden="true">
-        <g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 11.5 19 6.5 15.5 3M22 16.5 19 21.5 15.5 25M19.5 12 15 8.5 10.5 7M19.5 16 15 19.5 10.5 21M24.5 12l2.5-5 3.5-2.5M24.5 16l2.5 5 3.5 2.5"/>
-          <path d="M33.5 12.5 36 8.5 39 8M33.5 15.5 36 19.5 39 20"/>
-        </g>
-        <ellipse cx="9" cy="14" rx="8" ry="5.4" fill="currentColor"/>
-        <circle cx="17.6" cy="14" r="1.6" fill="currentColor"/>
-        <ellipse cx="23" cy="14" rx="4.4" ry="2.8" fill="currentColor"/>
-        <ellipse cx="31" cy="14" rx="3.4" ry="3.5" fill="currentColor"/>
-      </svg>
+      <img class="ant-logo" src="img/kebel-logo.png" alt="" width="32" height="32">
     </a>
     <ul class="nav-links">
       <li><a href="#instalar">enlace a sección</a></li>
@@ -56,10 +48,10 @@
       <h2>título de instalación.</h2>
       <p class="lede">descripción breve de la instalación</p>
       <div class="install-grid">
-        <div class="cmd">
-          <div class="cmd-bar"><span>terminal</span><button class="copy" id="copyCmd" type="button">copiar</button></div>
+        <figure class="cmd">
+          <figcaption class="cmd-bar"><span>terminal</span><button class="copy" id="copyCmd" type="button">copiar</button></figcaption>
           <pre><code id="cmdText"><span class="prompt">$</span> comando de instalación (npm install …)</code></pre>
-        </div>
+        </figure>
         <ol class="install-steps">
           <li><span class="step-num">Paso 01</span><p>instrucción 1</p></li>
           <li><span class="step-num">Paso 02</span><p>instrucción 2</p></li>
@@ -154,16 +146,7 @@
 <footer>
   <div class="wrap foot">
     <a class="logo" href="#hero" aria-label="Kebel, volver al inicio">
-      <svg class="ant-logo" viewBox="0 0 40 28" fill="none" aria-hidden="true">
-        <g stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 11.5 19 6.5 15.5 3M22 16.5 19 21.5 15.5 25M19.5 12 15 8.5 10.5 7M19.5 16 15 19.5 10.5 21M24.5 12l2.5-5 3.5-2.5M24.5 16l2.5 5 3.5 2.5"/>
-          <path d="M33.5 12.5 36 8.5 39 8M33.5 15.5 36 19.5 39 20"/>
-        </g>
-        <ellipse cx="9" cy="14" rx="8" ry="5.4" fill="currentColor"/>
-        <circle cx="17.6" cy="14" r="1.6" fill="currentColor"/>
-        <ellipse cx="23" cy="14" rx="4.4" ry="2.8" fill="currentColor"/>
-        <ellipse cx="31" cy="14" rx="3.4" ry="3.5" fill="currentColor"/>
-      </svg>
+      <img class="ant-logo" src="img/kebel-logo.png" alt="" width="32" height="32">
     </a>
     <nav aria-label="Secciones">
       <a href="#instalar">enlace a sección</a>
