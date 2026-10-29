@@ -2,13 +2,20 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { detectProviders, assignRoles } from '../src/config.js';
 
-test('detectProviders returns only providers whose version probe resolves', async () => {
+test('detectProviders returns only providers that are both installed and logged in', async () => {
+  const checkProvider = async ({ provider }) => ({ provider, ok: ['claude', 'codex'].includes(provider) });
+  const result = await detectProviders({ run: async () => {}, runCapture: async () => {}, checkProvider });
+  assert.deepEqual(result, ['claude', 'codex']);
+});
+
+test('detectProviders delegates each probe to the real checkProvider by default', async () => {
   const run = async (cmd) => {
-    if (cmd === 'claude' || cmd === 'codex') return;
+    if (cmd === 'claude') return;
     throw new Error('not found');
   };
-  const result = await detectProviders({ run });
-  assert.deepEqual(result, ['claude', 'codex']);
+  const runCapture = async () => ({ stdout: 'pong', stderr: '' });
+  const result = await detectProviders({ run, runCapture });
+  assert.deepEqual(result, ['claude']);
 });
 
 test('assignRoles picks 3 distinct providers for coder/reviewer/solomon when available', () => {
