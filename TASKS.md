@@ -69,19 +69,19 @@ _(vacía — todo el bloque de soporte al método está completo)_
   - Repo: dentro de este mismo (`apps/landing/`), como hace Karajan en su
     propio repo — proyecto Next.js (App Router) + TypeScript aislado, con
     su propio `package.json`, excluido del `"files"` que se publica a npm.
-  - Paleta y tipografía: exactamente las de daniel.fosela.com (sin colores
-    nuevos fuera de esa paleta). Pendiente: extraer los valores CSS reales
-    (bloqueado — el fetch disponible convierte la página a texto y pierde
-    el CSS; hace falta que el user pase los valores o un acceso que sirva
-    el HTML/CSS crudo).
+  - Paleta: exactamente la de daniel.fosela.com (valores reales ya en
+    `apps/landing/app/globals.css`). Tipografía real todavía pendiente de
+    confirmar (marcador de posición `system-ui` mientras tanto).
   - Rigor: tests reales para la lógica pura y testeable (generación de la
     curva/ruido del camino de las hormigas, jitter aleatorio de las letras,
     detección de `reduced-motion`, escalado responsive); QA visual manual
     para lo estético (geometría/aspecto de las hormigas, sensación del
     rebote, etc.) — eso no es testeable de forma significativa con TDD.
   - Orden de construcción por fases, cada una su propio PR:
-    1. Scaffold del proyecto Next.js + paleta/tipografía extraídas.
-    2. Geometría y movimiento de las hormigas (curva + ruido, con tests).
+    1. [x] Scaffold del proyecto Next.js + paleta extraída.
+    2. Geometría y movimiento de las hormigas (curva + ruido, con tests) —
+       en curso: camino ondulado (`lib/ants/path.ts`) ya hecho y testeado;
+       falta la geometría de la hormiga y la animación de las patas.
     3. Coreografía de las letras K-E-B-E-L (recogida/transporte/depósito).
     4. Loop infinito + `prefers-reduced-motion` + presupuesto de rendimiento
        (DPR, pausa fuera de viewport, menos hormigas en móvil, botón
@@ -95,6 +95,10 @@ _(vacía — todo el bloque de soporte al método está completo)_
 - [ ] `kb-project-context` — Un `PROJECT.md` (o similar) con la importancia y
   el contexto del proyecto en el que se usa Kebel, auto-mantenido a medida
   que se trabaja (formato y momento de actualización a decidir vía ADR)
+- [ ] `kb-public-release` — Última tarea: dejar el repo listo para hacerlo
+  público en GitHub y enlazarlo en el portfolio — ocultar/excluir (vía
+  `.gitignore` o equivalente) cualquier artefacto que delate que se construyó
+  con Karajan (`.karajan/`, referencias internas, etc.)
 
 ## Cola del usuario
 
