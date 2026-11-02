@@ -358,5 +358,32 @@ void main(){
     this.sph.instanceMatrix.needsUpdate = true; this.cyl.instanceMatrix.needsUpdate = true; this.blob.instanceMatrix.needsUpdate = true;
   };
 
+  // ---------- Hoja (forma, piezas y textura) ----------
+  KB.leafHalfW = (u) => { const t = (u + 1) / 2; return Math.pow(Math.max(0, Math.sin(Math.PI * Math.pow(t, 0.85))), 0.9) * 0.5; };
+  KB.leafGeo = (len, wid, u0, u1) => {
+    const sh = new THREE.Shape(); const N = 14;
+    for (let i = 0; i <= N; i++) { const u = u0 + (u1 - u0) * i / N; const x = u * len / 2, y = KB.leafHalfW(u) * wid; if (i === 0) sh.moveTo(x, y); else sh.lineTo(x, y); }
+    for (let i = N; i >= 0; i--) { const u = u0 + (u1 - u0) * i / N; sh.lineTo(u * len / 2, -KB.leafHalfW(u) * wid * 0.96); }
+    const g = new THREE.ShapeGeometry(sh);
+    const p = g.attributes.position, uv = g.attributes.uv;
+    for (let i = 0; i < p.count; i++) uv.setXY(i, p.getX(i) / len + 0.5, p.getY(i) / wid + 0.5);
+    return g;
+  };
+  KB.leafTex = (base, vein) => {
+    const c = document.createElement("canvas"); c.width = 512; c.height = 256; const g = c.getContext("2d");
+    g.fillStyle = base; g.fillRect(0, 0, 512, 256);
+    const r = KB.rng(4);
+    for (let i = 0; i < 900; i++) { g.fillStyle = "rgba(0,0,0," + (r() * 0.05) + ")"; g.fillRect(r() * 512, r() * 256, 2 + r() * 6, 2 + r() * 6); }
+    g.strokeStyle = vein; g.lineCap = "round";
+    g.lineWidth = 5; g.beginPath(); g.moveTo(0, 128); g.lineTo(512, 128); g.stroke();
+    g.lineWidth = 2;
+    for (let i = 1; i < 9; i++) {
+      const x = i * 56;
+      g.beginPath(); g.moveTo(x, 128); g.quadraticCurveTo(x + 24, 90, x + 60, 30); g.stroke();
+      g.beginPath(); g.moveTo(x, 128); g.quadraticCurveTo(x + 24, 166, x + 60, 226); g.stroke();
+    }
+    const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; return t;
+  };
+
   return KB;
 })();
