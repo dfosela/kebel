@@ -29,8 +29,15 @@ export async function runInit({
   const { warnings, ...roles } = assignRoles(available);
   warnings.forEach((warning) => log(`⚠ ${warning}`));
 
-  const { stdout: branchOut } = await runCapture('git', ['symbolic-ref', '--short', 'HEAD'], { cwd });
-  const baseBranch = branchOut.trim();
+  let baseBranch;
+  try {
+    const { stdout: branchOut } = await runCapture('git', ['symbolic-ref', '--short', 'HEAD'], { cwd });
+    baseBranch = branchOut.trim();
+  } catch {
+    const { stdout: shaOut } = await runCapture('git', ['rev-parse', '--short', 'HEAD'], { cwd });
+    baseBranch = shaOut.trim();
+    log(`⚠ HEAD está detached (sin rama); usando el commit ${baseBranch} como rama base.`);
+  }
 
   const config = { version: 1, roles, baseBranch };
   await saveConfig(config, cwd);
