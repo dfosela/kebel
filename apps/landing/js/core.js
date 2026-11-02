@@ -281,6 +281,82 @@ void main(){
     _mid.addVectors(A, Bp).multiplyScalar(0.5); _s.set(r, len, r);
     _M.compose(_mid, _q, _s); this.cyl.setMatrixAt(idx, _M);
   };
+  // P: punto del suelo bajo el cuerpo · F: hacia delante · U: normal del suelo
+  // dist: distancia recorrida (mueve las patas) · o: { ground(x,z), lift, reach, headYaw, headPitch, chew, still, shuffle }
+  KB.Ants.prototype.pose = function (i, P, F, U, dist, t, o) {
+    o = o || NO; const A = this.list[i]; const sc = A.scale;
+    _u.copy(U).normalize();
+    _f.copy(F).addScaledVector(_u, -F.dot(_u)); if (_f.lengthSq() < 1e-8) _f.set(1, 0, 0); _f.normalize();
+    _sd.crossVectors(_f, _u);
+    _B.makeBasis(_f, _u, _sd).scale(_sc.set(sc, sc, sc)).setPosition(P);
+    const toW = (x, y, z, out) => out.set(x, y, z).applyMatrix4(_B);
+    const cyc = dist / (4 * STR);
+    const bob = (o.still ? 0 : 0.012 * Math.sin((cyc + A.ph0) * Math.PI * 4)) + (o.lift || 0);
+    let k = i * SPH;
+    const part = (x, y, z, rx, ry, rz, pitch, yaw) => {
+      _L.makeRotationFromEuler(_e.set(0, yaw || 0, pitch || 0, "YXZ")); _L.scale(_s.set(rx, ry, rz)); _L.setPosition(x, y + bob, z);
+      _M.multiplyMatrices(_B, _L); this.sph.setMatrixAt(k++, _M);
+    };
+    const hs = A.head, gs = A.gaster;
+    part(-0.36 - (gs - 1) * 0.1, 0.30, 0, 0.25 * gs, 0.175 * gs, 0.18 * gs, 0.28);
+    part(-0.105, 0.255, 0, 0.055, 0.07, 0.05, 0);
+    part(-0.01, 0.27, 0, 0.09, 0.075, 0.07, -0.1);
+    part(0.115, 0.29, 0, 0.115, 0.085, 0.08, -0.18);
+    const hx = 0.30 + (hs - 1) * 0.08, yaw = o.headYaw || 0;
+    part(hx, 0.30, 0, 0.11 * hs, 0.095 * hs, 0.105 * hs, 0.22 + (o.headPitch || 0), yaw);
+
+    let c = i * CYL;
+    for (let side = 0; side < 2; side++) {
+      const sgn = side === 0 ? 1 : -1;
+      for (let l = 0; l < 3; l++) {
+        const D = LEGS[l]; const grp = (D.g + side) % 2;
+        let ph = (cyc + A.ph0 + grp * 0.5 + (o.shuffle || 0)) % 1; if (ph < 0) ph += 1;
+        let off, lift = 0;
+        if (o.still) off = 0;
+        else if (ph < 0.5) off = STR - (ph / 0.5) * 2 * STR;
+        else { const qq = (ph - 0.5) / 0.5; off = -STR + 2 * STR * KB.smooth(qq); lift = Math.sin(Math.PI * qq) * 0.065; }
+        toW(D.hx, D.hy + bob, sgn * D.hz, _H);
+        toW(D.hx + 0.015, D.hy - 0.055 + bob, sgn * (D.hz + 0.045), _Cx);
+        toW(D.rx * A.spread + off, 0, sgn * D.rz * A.spread, _Ft);
+        if (o.ground) _Ft.y = o.ground(_Ft.x, _Ft.z) + lift * sc; else _Ft.addScaledVector(_u, lift * sc);
+        _An.copy(_Ft).addScaledVector(_u, 0.03 * sc);
+        _pole.copy(_u).addScaledVector(_sd, sgn * 0.4);
+        ik(_Cx, _An, D.a * sc * A.legLen, D.b * sc * A.legLen, _pole, _K);
+        _T2.copy(_An).addScaledVector(_u, -0.03 * sc).addScaledVector(_sd, sgn * 0.06 * sc).addScaledVector(_f, (l === 0 ? 0.03 : l === 2 ? -0.03 : 0) * sc);
+        this.seg(c++, _H, _Cx, 0.024 * sc);
+        this.seg(c++, _Cx, _K, 0.019 * sc);
+        this.seg(c++, _K, _An, 0.0135 * sc);
+        this.seg(c++, _An, _T2, 0.009 * sc);
+      }
+    }
+    const reach = o.reach || 0;
+    for (let side = 0; side < 2; side++) {
+      const sgn = side === 0 ? 1 : -1; const w = A.wob + sgn * 1.7;
+      const e1 = 0.7 - reach * 0.5 + 0.13 * Math.sin(t * 2.3 + w);
+      const a1 = sgn * (0.5 + 0.16 * Math.sin(t * 1.6 + w * 1.3)) * (1 - reach * 0.45) - yaw;
+      const e2 = -0.3 - reach * 0.45 + 0.22 * Math.sin(t * 4.1 + w * 2.0);
+      const a2 = sgn * (0.12 + 0.18 * Math.sin(t * 3.3 + w * 0.6)) - yaw * 0.9;
+      const bx = hx + 0.07 * hs * Math.cos(yaw), bz = sgn * 0.045 * hs - 0.07 * hs * Math.sin(yaw);
+      const L1 = 0.19 * A.ant, L2 = 0.27 * A.ant;
+      const ex = bx + Math.cos(e1) * Math.cos(a1) * L1, ey = 0.345 + bob + Math.sin(e1) * L1, ez = bz + Math.cos(e1) * Math.sin(a1) * L1;
+      toW(bx, 0.345 + bob, bz, _a); toW(ex, ey, ez, _b);
+      this.seg(c++, _a, _b, 0.011 * sc);
+      toW(ex + Math.cos(e2) * Math.cos(a2) * L2, ey + Math.sin(e2) * L2, ez + Math.cos(e2) * Math.sin(a2) * L2, _H);
+      this.seg(c++, _b, _H, 0.0085 * sc);
+    }
+    const ch = o.chew || 0, md = A.mand;
+    for (let side = 0; side < 2; side++) {
+      const sgn = side === 0 ? 1 : -1;
+      toW(hx + 0.09 * hs, 0.275 + bob, sgn * 0.035 * hs, _a);
+      toW(hx + 0.09 * hs + 0.08 * md, 0.258 + bob, sgn * (0.008 + 0.03 * ch) * md, _b);
+      this.seg(c++, _a, _b, 0.014 * sc * md);
+    }
+    _L.makeScale(1.05, 1, 0.62); _L.setPosition(-0.06, 0.012, 0);
+    _M.multiplyMatrices(_B, _L); this.blob.setMatrixAt(i, _M);
+  };
+  KB.Ants.prototype.commit = function () {
+    this.sph.instanceMatrix.needsUpdate = true; this.cyl.instanceMatrix.needsUpdate = true; this.blob.instanceMatrix.needsUpdate = true;
+  };
 
   return KB;
 })();
