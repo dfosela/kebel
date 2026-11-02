@@ -15,6 +15,7 @@ node_modules/
 .reviews/
 .karajan/
 .claude/
+.mcp.json
 AGENTS.md
 CLAUDE.md
 GEMINI.md
