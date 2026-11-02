@@ -48,7 +48,7 @@ export async function runInit({
 
   await ensureSqueezr({ run, log });
 
-  const hookPath = await installPreCommitHook({ runCapture, cwd, binPath });
+  const hookPath = await installPreCommitHook({ runCapture, cwd, binPath, log });
   log(`Gate de git instalado: ${hookPath}.`);
 
   const scaffoldResults = await writeScaffoldFiles({ roles, cwd });
