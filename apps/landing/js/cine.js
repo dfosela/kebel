@@ -614,4 +614,78 @@
     camera.position.copy(cam.pos); camera.lookAt(cam.look);
     const d = cam.pos.distanceTo(cam.look); scene.fog.near = d * 1.7; scene.fog.far = d * 3.4;
   }
+
+  // ---------- UI (solo lectura: es una animación explicativa) ----------
+  const segs = STEPS.map(() => { const li = document.createElement("li"); ui.progress.appendChild(li); return li; });
+  let shownStep = -1, leaving = false, panelAway = false;
+  const stepAt = (t) => STEPS.reduce((a, s, i) => (t >= s.t0 ? i : a), 0);
+  const stepEnd = (i) => (i + 1 < STEPS.length ? STEPS[i + 1].t0 : EXIT0);
+  function updateUI() {
+    const k = stepAt(T);
+    if (k !== shownStep) {
+      shownStep = k;
+      ui.label.textContent = "Paso " + String(k + 1).padStart(2, "0") + " de " + String(STEPS.length).padStart(2, "0") + " · " + STEPS[k].name;
+      ui.text.textContent = STEPS[k].text;
+    }
+    segs.forEach((li, i) => { const p = i < k ? 1 : i > k ? 0 : KB.range(T, STEPS[i].t0, stepEnd(i)); li.style.setProperty("--p", p.toFixed(3)); });
+    const away = T > EXIT0 + 0.4;
+    if (away !== panelAway) { panelAway = away; ui.panel.classList.toggle("away", away); }
+  }
+  function skipToExit() { if (leaving) return; if (T < EXIT0) T = EXIT0; }
+  function leave() {
+    if (leaving) return; leaving = true;
+    ui.fade.classList.add("light", "on");
+    setTimeout(() => { location.href = INTRO_URL + "#desde-cinematica"; }, 600);
+  }
+  ui.close.addEventListener("click", skipToExit);
+  window.addEventListener("keydown", (e) => { if (e.key === "Escape") { e.preventDefault(); skipToExit(); } });
+
+  // ---------- Tema ----------
+  function applyTheme() {
+    readColors(); applyLights(); colorFace(); colorSurface(); colorDecor();
+    ants.setColors(COL["ant-body"]);
+    if (leafMat.map) leafMat.map.dispose(); leafMat.map = KB.leafTex(COL.leaf, COL["leaf-vein"]); leafMat.needsUpdate = true;
+    blocks.forEach((b) => b.material.color.copy(lin("accent")).multiplyScalar(0.72));
+    oldMat.color.copy(lin("accent-deep")).multiplyScalar(0.8);
+    dust.setColor(lin("dust"));
+    kick();
+  }
+  KB.onTheme(applyTheme);
+
+  // ---------- Bucle ----------
+  let raf = 0, last = 0, idle = 0;
+  function kick() { idle = 0; }
+  function frame(now) {
+    raf = requestAnimationFrame(frame);
+    const dt = Math.min(0.05, (now - last) / 1000 || 0); last = now; clock += dt;
+    T += dt; tt += dt;
+    if (T >= EXIT1 - 0.55) leave();
+    try {
+    updateUI();
+    poseAll(T, tt + T * 0.0);
+    updateCamera(dt);
+    ants.commit();
+    post.render(scene, camera, { focus: camera.position.distanceTo(cam.look), range: 0.2 + cam.wide * 0.35, maxR: Q.mobile ? 5 : 9, time: clock, vig: 0.16, grain: 0.016 });
+    } catch (err) { cancelAnimationFrame(raf); raf = 0; console.error("[Kebel cinemática] La animación se ha detenido:", err); leave(); }
+  }
+  function resize() { const w = root.clientWidth, h = root.clientHeight; camera.aspect = w / h; camera.updateProjectionMatrix(); post.setSize(w, h); kick(); }
+  window.addEventListener("resize", resize);
+  document.addEventListener("visibilitychange", () => { if (document.hidden) { cancelAnimationFrame(raf); raf = 0; } else if (!raf) { last = performance.now(); raf = requestAnimationFrame(frame); } });
+
+  resize();
+  applyTheme();
+  updateUI();
+  if (fromIntro) {
+    ui.fade.classList.add("on", "instant");
+    requestAnimationFrame(() => { ui.fade.classList.remove("instant"); requestAnimationFrame(() => ui.fade.classList.remove("on")); });
+    try { history.replaceState(null, "", location.pathname + location.search); } catch (e) { /* vista previa sin historial */ }
+  }
+  last = performance.now(); raf = requestAnimationFrame(frame);
+
+  // API mínima para depurar o controlar desde fuera
+  window.KebelCine = {
+    skip: skipToExit,
+    pause() { cancelAnimationFrame(raf); raf = 0; },
+    at(t) { T = t; tt = t; poseAll(T, tt); cam.init = false; updateCamera(0); updateUI(); ants.commit(); post.render(scene, camera, { focus: camera.position.distanceTo(cam.look), range: 0.2 + cam.wide * 0.35, maxR: Q.mobile ? 5 : 9, time: 0, vig: 0.16, grain: 0.016 }); }
+  };
 })();
