@@ -4,6 +4,22 @@
   "description": "Kebel — lite, token-efficient AI dev orchestrator (TDD-first, cross-AI review, real git gates), for people without large AI subscriptions.",
   "type": "module",
   "license": "MIT",
+  "author": "Daniel Fosela",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dfosela/kebel.git"
+  },
+  "homepage": "https://github.com/dfosela/kebel#readme",
+  "bugs": {
+    "url": "https://github.com/dfosela/kebel/issues"
+  },
+  "keywords": [
+    "ai",
+    "orchestrator",
+    "cli",
+    "tdd",
+    "code-review"
+  ],
   "bin": {
     "kb": "./bin/kb.js"
   },
