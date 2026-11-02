@@ -1,6 +1,13 @@
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 
+// TRUST MODEL: this is plain, unsigned JSON — the gate trusts whatever is on
+// disk, so the same agent that writes code could in principle write a fake
+// approved verdict here itself. Cryptographically signing it would not
+// close that gap: the threat model's adversary already has shell access to
+// the repo, so it could just as easily read a signing key stored anywhere
+// reachable from this machine. The real boundary is procedural, not
+// cryptographic: a human reviews what actually gets pushed/merged.
 const VERDICT_DIR = '.kebel';
 const VERDICT_FILE = 'verdict.json';
 
