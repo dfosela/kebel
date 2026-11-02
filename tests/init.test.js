@@ -80,6 +80,41 @@ test('runInit detects providers, assigns roles, writes config, runs Squeezr setu
   });
 });
 
+// Regression coverage for a real audit finding (2026-11-02): on a detached
+// HEAD, `git symbolic-ref --short HEAD` exits non-zero and runCapture
+// rejects — this used to crash runInit uncaught instead of falling back to
+// something usable (e.g. during a rebase or a CI checkout of a tag/SHA).
+test('runInit falls back to the short commit sha as baseBranch on detached HEAD instead of crashing', async () => {
+  await withTempDir(async (cwd) => {
+    const run = async (cmd) => {
+      if (cmd === 'claude') return;
+      throw new Error('not found');
+    };
+    const runCapture = async (cmd, args) => {
+      if (cmd === 'git' && args[0] === 'symbolic-ref') {
+        throw Object.assign(new Error('fatal: not a symbolic ref'), { code: 128 });
+      }
+      if (cmd === 'git' && args[0] === 'rev-parse') return { stdout: 'abc1234\n', stderr: '' };
+      if (cmd === 'claude') return { stdout: 'pong', stderr: '' };
+      throw new Error(`unexpected runCapture call: ${cmd} ${args.join(' ')}`);
+    };
+    const ensureSqueezr = async () => ({ installed: true, configured: true });
+    const logs = [];
+
+    const config = await runInit({
+      run,
+      runCapture,
+      log: (m) => logs.push(m),
+      ensureSqueezr,
+      cwd,
+      installPreCommitHook: fakeInstallPreCommitHook([]),
+    });
+
+    assert.equal(config.baseBranch, 'abc1234');
+    assert.match(logs.join('\n'), /detached/);
+  });
+});
+
 test('runInit is idempotent: a second run reports the existing config instead of overwriting it', async () => {
   await withTempDir(async (cwd) => {
     const run = async (cmd) => {
