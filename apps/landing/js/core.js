@@ -82,5 +82,99 @@ const KB = (function () {
     g.computeVertexNormals(); return g;
   };
 
+  // ---------- Postproceso: DOF por profundidad + tono + viñeta + grano ----------
+  const VS = "varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }";
+  function blurFS(horizontal, fromDepth) {
+    return `
+precision highp float;
+varying vec2 vUv;
+uniform sampler2D tColor; uniform sampler2D tDepth;
+uniform vec2 texel; uniform float cNear, cFar, focus, range, maxR, fgMul;
+uniform float exposure, vig, grain, time, aspect;
+float lin(float d){ float z = d * 2.0 - 1.0; return 2.0 * cNear * cFar / (cFar + cNear - z * (cFar - cNear)); }
+float cocAt(vec2 uv){
+  ${fromDepth ? "float d = lin(texture2D(tDepth, uv).x); float c = (d - focus) / (focus * range); c = c < 0.0 ? -c * fgMul : c; return clamp(c, 0.0, 1.0);" : "return texture2D(tColor, uv).a;"}
+}
+vec3 shoulder(vec3 c){ vec3 k = vec3(0.9); vec3 o = max(c - k, 0.0); return min(c, k) + 0.1 * (1.0 - exp(-o / 0.1)); }
+vec3 toSRGB(vec3 c){ c = clamp(c, 0.0, 1.0); return mix(c * 12.92, 1.055 * pow(c, vec3(1.0 / 2.4)) - 0.055, step(0.0031308, c)); }
+float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
+void main(){
+  float c0 = cocAt(vUv);
+  vec3 acc = texture2D(tColor, vUv).rgb; float ws = 1.0;
+  float rad = maxR * c0;
+  vec2 dir = ${horizontal ? "vec2(texel.x, 0.0)" : "vec2(0.0, texel.y)"};
+  for (int i = 1; i <= TAPS; i++) {
+    float fi = float(i) / float(TAPS);
+    float g = exp(-fi * fi * 2.2);
+    vec2 o = dir * fi * rad;
+    float ca = cocAt(vUv + o); float cb = cocAt(vUv - o);
+    float wa = g * clamp(ca / max(c0, 0.03), 0.0, 1.0);
+    float wb = g * clamp(cb / max(c0, 0.03), 0.0, 1.0);
+    acc += texture2D(tColor, vUv + o).rgb * wa + texture2D(tColor, vUv - o).rgb * wb;
+    ws += wa + wb;
+  }
+  vec3 col = acc / ws;
+  ${horizontal ? "gl_FragColor = vec4(col, c0);" : `
+  col = shoulder(col * exposure);
+  col = toSRGB(col);
+  vec2 q = (vUv - 0.5) * vec2(aspect, 1.0);
+  float v = smoothstep(1.05, 0.25, length(q));
+  col *= mix(1.0 - vig, 1.0, v);
+  col += (hash(gl_FragCoord.xy + fract(time) * 91.0) - 0.5) * grain;
+  gl_FragColor = vec4(col, 1.0);`}
+}`;
+  }
+
+  KB.Post = function (renderer, q) {
+    this.r = renderer; this.q = q;
+    this.ok = renderer.capabilities.isWebGL2;
+    renderer.toneMapping = THREE.NoToneMapping;
+    if (!this.ok) { renderer.outputEncoding = THREE.sRGBEncoding; return; }
+    renderer.outputEncoding = THREE.LinearEncoding;
+    const mk = (depth) => {
+      const rt = new THREE.WebGLRenderTarget(4, 4, { type: THREE.HalfFloatType, format: THREE.RGBAFormat, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, depthBuffer: depth, stencilBuffer: false });
+      if (depth) { rt.depthTexture = new THREE.DepthTexture(4, 4); rt.depthTexture.type = THREE.UnsignedIntType; }
+      return rt;
+    };
+    this.rtA = mk(true); this.rtB = mk(false);
+    const uni = () => ({
+      tColor: { value: null }, tDepth: { value: null }, texel: { value: new THREE.Vector2() },
+      cNear: { value: 1 }, cFar: { value: 100 }, focus: { value: 20 }, range: { value: 0.3 }, maxR: { value: 8 }, fgMul: { value: 1.3 },
+      exposure: { value: 1 }, vig: { value: 0.14 }, grain: { value: 0.018 }, time: { value: 0 }, aspect: { value: 1 }
+    });
+    const defs = { TAPS: q.taps };
+    this.mH = new THREE.ShaderMaterial({ uniforms: uni(), vertexShader: VS, fragmentShader: blurFS(true, true), defines: defs, depthTest: false, depthWrite: false });
+    this.mV = new THREE.ShaderMaterial({ uniforms: uni(), vertexShader: VS, fragmentShader: blurFS(false, false), defines: defs, depthTest: false, depthWrite: false });
+    const geo = new THREE.PlaneGeometry(2, 2);
+    this.sH = new THREE.Scene(); this.sH.add(new THREE.Mesh(geo, this.mH));
+    this.sV = new THREE.Scene(); this.sV.add(new THREE.Mesh(geo, this.mV));
+    this.qc = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+  };
+  KB.Post.prototype.setSize = function (w, h) {
+    const dpr = this.r.getPixelRatio();
+    this.r.setSize(w, h, false);
+    if (!this.ok) return;
+    const W = Math.max(4, Math.round(w * dpr * this.q.ss)), H = Math.max(4, Math.round(h * dpr * this.q.ss));
+    this.rtA.setSize(W, H); this.rtB.setSize(W, H);
+    this.scale = dpr * this.q.ss;
+    [this.mH, this.mV].forEach((m) => { m.uniforms.texel.value.set(1 / W, 1 / H); m.uniforms.aspect.value = w / h; });
+  };
+  KB.Post.prototype.render = function (scene, camera, p) {
+    if (!this.ok) { this.r.setRenderTarget(null); this.r.render(scene, camera); return; }
+    const r = this.r;
+    r.setRenderTarget(this.rtA); r.render(scene, camera);
+    const H = this.mH.uniforms, V = this.mV.uniforms;
+    H.tColor.value = this.rtA.texture; H.tDepth.value = this.rtA.depthTexture;
+    H.cNear.value = camera.near; H.cFar.value = camera.far;
+    H.focus.value = p.focus; H.range.value = p.range; H.fgMul.value = p.fgMul || 1.3;
+    const mr = (p.maxR || 8) * this.scale;
+    H.maxR.value = mr; V.maxR.value = mr;
+    r.setRenderTarget(this.rtB); r.render(this.sH, this.qc);
+    V.tColor.value = this.rtB.texture;
+    V.exposure.value = p.exposure || 1; V.vig.value = p.vig === undefined ? 0.14 : p.vig;
+    V.grain.value = p.grain === undefined ? 0.016 : p.grain; V.time.value = p.time || 0;
+    r.setRenderTarget(null); r.render(this.sV, this.qc);
+  };
+
   return KB;
 })();
