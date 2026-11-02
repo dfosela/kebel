@@ -15,7 +15,7 @@ async function defaultFileExists(filePath) {
 export function buildScaffoldContent({ roles }) {
   return `# Kebel
 
-Este proyecto usa [Kebel](https://github.com/manufosela/kebel) para TDD-first,
+Este proyecto usa [Kebel](https://github.com/dfosela/kebel) para TDD-first,
 revisión cruzada entre IAs y gates de git reales.
 
 ## Roles de IA configurados
@@ -29,7 +29,8 @@ revisión cruzada entre IAs y gates de git reales.
 - Antes de cada commit: \`kb review --staged\`. El commit se bloquea sin un
   veredicto aprobado y con el hash del diff intacto.
 - Todo archivo en \`src/\` necesita su test correspondiente en \`tests/\`
-  antes de commitear (\`kb-tdd-check\`).
+  antes de commitear — se comprueba automáticamente en el hook de
+  pre-commit, no es un subcomando \`kb\` a ejecutar a mano.
 - Tareas y su estado: \`kb card add/list/move\`.
 - ADRs ligeras en markdown: \`kb adr add/list\`.
 - Diagnóstico del setup (incluye login de cada proveedor): \`kb doctor\`.
