@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kebel · Cómo funciona</title>
+<meta name="description" content="Así funciona Kebel por dentro, contado como un hormiguero.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="css/cinematica.css">
+<link rel="icon" href="img/kebel-logo.png">
+</head>
+<body>
+<main class="cine" id="cine">
+  <canvas id="scene" aria-hidden="true"></canvas>
+  <h1 class="sr-only">Cómo funciona Kebel</h1>
+  <div class="top">
+    <p class="brand">kebel · dentro del hormiguero</p>
+    <button class="pill" id="closeBtn" type="button" aria-label="Saltar la explicación y volver a la intro">Saltar
+      <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 2.5 7.5 6 3 9.5M8.5 2.5v7" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+
+  <section class="panel" id="panel" aria-label="Explicación">
+    <ol class="progress" id="progress" aria-hidden="true"></ol>
+    <div class="step-head">
+      <p class="eyebrow" id="stepLabel">Paso 01 de 06 · Entrada</p>
+      <p class="keys" aria-hidden="true">esc para saltar</p>
+    </div>
+    <p class="step-text" id="stepText" aria-live="polite">Se te cae una idea en la entrada del hormiguero.</p>
+  </section>
+  <div class="nogl-msg"><p>Tu navegador no puede mostrar la animación 3D.</p></div>
+  <div class="fade" id="fade" aria-hidden="true"></div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha512-dLxUelApnYxpLt6K2iomGngnHO83iUvZytA3YjDUCjT0HDOHKXnVYdf3hU4JjM8uEhxf9nD1/ey98U3t2vZ0qQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="js/core.js"></script>
+<script src="js/cine.js"></script>
+</body>
+</html>
