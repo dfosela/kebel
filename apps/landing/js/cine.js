@@ -243,4 +243,80 @@
     for (let i = 0; i < col.count; i++) { c.copy(a).lerp(b, KB.smooth(0.5 + D.n1[i] * 1.2)).lerp(s, D.k2[i] * 0.5).lerp(h, D.k[i] * 0.9); col.setXYZ(i, c.r, c.g, c.b); }
     col.needsUpdate = true;
   }
+
+  // ---------- Decorado ----------
+  const rockMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.86, bumpMap: grainBump, bumpScale: 0.015 });
+  const tinted = [];
+  let rootsMat, eggMesh, seedMesh;
+  function instanced(geo, mat, items, cast) {
+    const m = new THREE.InstancedMesh(geo, mat, Math.max(1, items.length));
+    const M = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), p = new THREE.Vector3(), s = new THREE.Vector3();
+    items.forEach((it, i) => { M.compose(p.set(it.x, it.y, it.z), q.setFromEuler(e.set(it.rx || 0, it.ry || 0, it.rz || 0)), s.set(it.sx, it.sy, it.sz)); m.setMatrixAt(i, M); });
+    m.castShadow = !!cast; m.receiveShadow = true; m.userData.items = items; scene.add(m); tinted.push(m); return m;
+  }
+  (function decor() {
+    const r = KB.rng(31);
+    const faceRocks = [[], [], []];
+    const want = Q.mobile ? 110 : 190;
+    for (let i = 0; i < want * 4 && faceRocks.flat().length < want; i++) {
+      const x = FX0 + 2 + r() * (FX1 - FX0 - 4), y = -1.4 - r() * 34;
+      if (carve(x, y) > 0.01 || carve(x, y + 0.4) > 0.01 || carve(x, y - 0.4) > 0.01) continue;
+      const s = 0.07 + Math.pow(r(), 2.5) * 0.32;
+      faceRocks[(r() * 3) | 0].push({ x, y, z: 0.02, sx: s, sy: s * (0.6 + r() * 0.4), sz: s * 0.7, rx: r() * 6, ry: r() * 6, rz: r() * 6, c: r() });
+    }
+    const geos = [KB.rockGeo(3, 1), KB.rockGeo(9, 1), KB.rockGeo(17, 1)];
+    faceRocks.forEach((list, i) => instanced(geos[i], rockMat, list, true));
+    const top = [];
+    for (let i = 0; i < (Q.mobile ? 40 : 80); i++) {
+      const x = -32 + r() * 64, z = -0.6 - r() * 14; if (Math.abs(x - EX) < 2.2) continue;
+      const s = 0.06 + Math.pow(r(), 3) * 0.45; top.push({ x, y: surfH(x, z) - s * 0.25, z, sx: s, sy: s * 0.7, sz: s, ry: r() * 6, c: r() });
+    }
+    instanced(geos[1], rockMat, top, true);
+    const grains = [];
+    for (let i = 0; i < (Q.mobile ? 500 : 1400); i++) { const x = -32 + r() * 64, z = -0.3 - r() * 16; const s = 0.016 + r() * r() * 0.05; grains.push({ x, y: surfH(x, z) + s * 0.2, z, sx: s, sy: s * 0.7, sz: s, rx: r() * 6, ry: r() * 6, c: r() }); }
+    instanced(KB.rockGeo(5, 0), rockMat, grains, false);
+    // Hierba
+    const blade = new THREE.ConeGeometry(0.035, 1, 3); blade.translate(0, 0.5, 0);
+    const grassMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 }); grassMat.userData.grass = true;
+    const blades = [];
+    for (let i = 0; i < (Q.mobile ? 90 : 190); i++) {
+      const x = -32 + r() * 64, z = -0.25 - Math.pow(r(), 1.5) * 7; if (Math.abs(x - EX) < 2.4) continue;
+      const h = 0.35 + r() * 0.8; blades.push({ x, y: surfH(x, z) - 0.02, z, sx: 1, sy: h, sz: 1, rx: (r() - 0.5) * 0.6, ry: r() * 6, rz: (r() - 0.5) * 0.6, c: r(), grass: true });
+    }
+    instanced(blade, grassMat, blades, true);
+    // Raíces
+    const rootMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.85 }); rootMat.userData.col = "root";
+    [-28, -23.5, -7.5, 1.5, 9.5, 20.5, 27].forEach((x0, i) => {
+      const pts = []; let x = x0, y = surfH(x0, 0) + 0.1; const depth = 3 + r() * 4.5;
+      for (let k = 0; k <= 6; k++) { pts.push(new THREE.Vector3(x, y, 0.04)); x += (r() - 0.5) * 1.4; y -= depth / 6; }
+      const ok = pts.every((p) => carve(p.x, p.y) < 0.05);
+      if (!ok) return;
+      const m = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 40, 0.05 + r() * 0.05, 6, false), rootMat);
+      m.castShadow = true; m.receiveShadow = true; scene.add(m);
+    });
+    rootsMat = rootMat;
+    // Huevos en la cría y semillas en la despensa
+    const eggs = [];
+    for (let i = 0; i < 16; i++) { const row = i < 9 ? 0 : 1; const x = -12.6 + (row ? 0.27 : 0) + (i % 9) * 0.32 + (r() - 0.5) * 0.05; eggs.push({ x, y: -13.5 + 0.11 + row * 0.19, z: BLOCK_Z + (r() - 0.5) * 0.15, sx: 0.16, sy: 0.11, sz: 0.11, ry: (r() - 0.5) * 0.5, rz: (r() - 0.5) * 0.3, c: r(), egg: true }); }
+    const sphere = new THREE.SphereGeometry(1, 14, 10);
+    eggMesh = instanced(sphere, new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.45 }), eggs, true);
+    const seeds = [];
+    for (let i = 0; i < 6; i++) seeds.push({ x: 9.0 + i * 0.32, y: -15.6 + 0.13, z: BLOCK_Z + (r() - 0.5) * 0.2, sx: 0.24, sy: 0.13, sz: 0.15, ry: r() * 6, c: r(), seed: true });
+    seedMesh = instanced(sphere, new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.6 }), seeds, true);
+  })();
+  function colorDecor() {
+    const pal = [lin("stone-a"), lin("stone-b"), lin("stone-c"), lin("soil-mid")];
+    const gr = lin("grass"), egg = lin("egg"), seed = lin("seed"); const c = new THREE.Color();
+    tinted.forEach((m) => {
+      m.userData.items.forEach((k, i) => {
+        if (k.grass) c.copy(gr).offsetHSL((k.c - 0.5) * 0.04, 0, (k.c - 0.5) * 0.12);
+        else if (k.egg) c.copy(egg).offsetHSL(0, 0, (k.c - 0.5) * 0.04);
+        else if (k.seed) c.copy(seed).offsetHSL(0, 0, (k.c - 0.5) * 0.08);
+        else { c.copy(pal[Math.floor(k.c * 4) % 4]).lerp(pal[Math.floor(k.c * 13) % 4], (k.c * 7) % 1); }
+        m.setColorAt(i, c);
+      });
+      if (m.instanceColor) m.instanceColor.needsUpdate = true;
+    });
+    if (rootsMat) rootsMat.color.copy(lin("root"));
+  }
 })();
