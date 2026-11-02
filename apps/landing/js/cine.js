@@ -538,4 +538,80 @@
     }
     dust.update(T);
   }
+
+  // ---------- Cámara ----------
+  const tanV = Math.tan(THREE.MathUtils.degToRad(15));
+  function fit(look, off, needW, out) {
+    const asp = camera.aspect; const dz = off.z;
+    if (asp < 0.9) needW *= KB.lerp(0.5, 0.85, KB.range(asp, 0.45, 0.9));
+    const k = Math.max(1, needW / (2 * tanV * asp * dz));
+    out.copy(look).addScaledVector(off, k); return out;
+  }
+  function lift(look, pos, amt) {
+    amt = amt === undefined ? 1 : amt;
+    const frac = KB.clamp((ui.panel.offsetHeight + 24) / Math.max(1, root.clientHeight), 0, 0.6);
+    const d = look.distanceTo(pos); const sh = 2 * tanV * d * frac * 0.5 * amt;
+    look.y -= sh; pos.y -= sh;
+  }
+  const SURF_CAM = { look: new THREE.Vector3(EX - 3, 0.3, -1.6), off: new THREE.Vector3(5, 6.2, 12.5), w: 13 };
+  function shotFor(T, out) {
+    const k = STEPS.reduce((a, s, i) => (T >= s.t0 ? i : a), 0);
+    const L = new THREE.Vector3(), O = new THREE.Vector3(); let w = 8;
+    const lerpShot = (a, b, u) => { L.copy(a.look).lerp(b.look, u); O.copy(a.off).lerp(b.off, u); w = KB.lerp(a.w, b.w, u); };
+    const leafP = () => { const p = pieces[1].position; return new THREE.Vector3(KB.clamp(p.x, -18, -7.5), Math.max(p.y, -4.0), -0.6); };
+    const shots = [
+      () => lerpShot(SURF_CAM, { look: new THREE.Vector3(EX - 1.2, -0.8, -0.6), off: new THREE.Vector3(2.6, 3.0, 14), w: 12 }, KB.easeInOut(KB.range(T, 3.6, 7))),
+      () => {
+        const follow = { look: leafP(), off: new THREE.Vector3(2.4, 1.5, 13.5), w: 11 };
+        lerpShot(follow, { look: new THREE.Vector3(-8.0, -3.5, -0.6), off: new THREE.Vector3(1.0, 1.2, 13), w: 12 }, KB.easeInOut(KB.range(T, 10.2, 12)));
+      },
+      () => lerpShot({ look: new THREE.Vector3(-8.0, -3.5, -0.6), off: new THREE.Vector3(1.0, 1.2, 13), w: 12 }, { look: new THREE.Vector3(-7.8, -3.6, -0.6), off: new THREE.Vector3(0.7, 1.0, 11.5), w: 10 }, KB.easeInOut(KB.range(T, 13, 15))),
+      () => {
+        const lead = W_POS[0]; const follow = { look: new THREE.Vector3(KB.clamp(lead.x, -7.5, 2.4), KB.clamp(lead.y + 0.7, -7.4, -3.6), -0.6), off: new THREE.Vector3(1.2, 1.4, 13.5), w: 11.5 };
+        lerpShot(follow, { look: new THREE.Vector3(2.6, -7.3, -0.6), off: new THREE.Vector3(1.0, 1.2, 12.5), w: 11 }, KB.easeInOut(KB.range(T, 20.5, 22)));
+      },
+      () => {
+        const ax = ARB.at(arbS(T), {}).x;
+        L.set(KB.clamp(KB.lerp(ax, 2.6, 0.45), 3.3, 7.5), -7.35, -0.6); O.set(1.0, 1.2, 13.5); w = 12;
+      },
+      () => {
+        const lead = W_POS[0];
+        const follow = { look: new THREE.Vector3(KB.clamp(lead.x, 4, 14.5), KB.clamp(lead.y + 0.7, -15, -7.3), -0.6), off: new THREE.Vector3(1.4, 1.4, 13.5), w: 11.5 };
+        const pantry = { look: new THREE.Vector3(14.6, -14.9, -0.6), off: new THREE.Vector3(0.8, 1.3, 13), w: 12 };
+        const over = { look: new THREE.Vector3(-1.5, -9.5, 0), off: new THREE.Vector3(0, 3, 48), w: 44 };
+        if (T < 34.6) lerpShot(follow, pantry, KB.easeInOut(KB.range(T, 32.8, 34.2)));
+        else lerpShot(pantry, over, KB.easeInOut(KB.range(T, 34.6, 36.6)));
+      }
+    ];
+    if (T >= EXIT0) return exitShot(T, out);
+    shots[k]();
+    out.look = L; out.pos = fit(L, O, w, new THREE.Vector3()); out.wide = KB.smooth((w - 12) / 30);
+    lift(out.look, out.pos, 1 - out.wide);
+    return out;
+  }
+  // Salida: de la vista general a la boca del túnel, sube por él y sale a la luz
+  const EXIT_POS = [new THREE.Vector3(-1.5, -6.5, 48), new THREE.Vector3(EX + 2.2, -5.6, 8.5), new THREE.Vector3(EX + 0.3, -3.6, 3.6), new THREE.Vector3(EX + 0.2, -1.2, 3.0), new THREE.Vector3(EX + 0.25, 0.9, 1.6), new THREE.Vector3(EX + 0.25, 1.5, 0.3)];
+  const EXIT_LOOK = [new THREE.Vector3(-1.5, -9.5, 0), new THREE.Vector3(EX + 0.2, -4.0, -0.7), new THREE.Vector3(EX + 0.15, -2.0, -0.7), new THREE.Vector3(EX + 0.15, 0.6, -1.0), new THREE.Vector3(EX + 0.3, 1.8, -4), new THREE.Vector3(EX + 0.4, 2.6, -12)];
+  const exitPosC = new THREE.CatmullRomCurve3(EXIT_POS, false, "centripetal"), exitLookC = new THREE.CatmullRomCurve3(EXIT_LOOK, false, "centripetal");
+  function exitShot(T, out) {
+    // ritmo: bajar a la boca del túnel, subir despacio y asomarse fuera
+    const u = T < 38.4 ? 0.3 * KB.easeInOut(KB.range(T, EXIT0, 38.4)) : T < 40.6 ? 0.3 + 0.52 * KB.smooth(KB.range(T, 38.4, 40.6)) : 0.82 + 0.18 * KB.easeOut(KB.range(T, 40.6, EXIT1));
+    out.pos = exitPosC.getPointAt(u); out.look = exitLookC.getPointAt(u); out.wide = KB.smooth(1 - u * 3);
+    if (u < 0.2) { const p0 = fit(EXIT_LOOK[0], new THREE.Vector3(0, 3, 48), 44, new THREE.Vector3()); out.pos.lerp(p0, 1 - u / 0.2); }
+    out.exit = true;
+    return out;
+  }
+  const cam = { pos: new THREE.Vector3(), look: new THREE.Vector3(), wide: 0, init: false };
+  const shot = {};
+  function updateCamera(dt) {
+    shot.exit = false; shotFor(T, shot);
+    const tgtPos = shot.pos, tgtLook = shot.look, wide = shot.wide;
+    if (!cam.init || reduce) { cam.pos.copy(tgtPos); cam.look.copy(tgtLook); cam.wide = wide; cam.init = true; }
+    else {
+      const k = 1 - Math.exp(-dt * (shot.exit ? 9 : 4.5));
+      cam.pos.lerp(tgtPos, k); cam.look.lerp(tgtLook, k); cam.wide += (wide - cam.wide) * k;
+    }
+    camera.position.copy(cam.pos); camera.lookAt(cam.look);
+    const d = cam.pos.distanceTo(cam.look); scene.fog.near = d * 1.7; scene.fog.far = d * 3.4;
+  }
 })();
