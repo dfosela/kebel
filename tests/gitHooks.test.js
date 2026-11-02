@@ -20,6 +20,20 @@ test('preCommitHookScript invokes kb git-gate-check via node with the given bin 
   assert.match(script, /node "\/repo\/bin\/kb\.js" git-gate-check/);
 });
 
+// Regression coverage for a real audit finding (2026-11-02): binPath was
+// interpolated unescaped into a double-quoted sh string — a path containing
+// a double quote, backtick, `$` or backslash could break out of the string
+// or get shell-expanded/command-substituted when the hook runs.
+test('preCommitHookScript escapes shell-significant characters in binPath', () => {
+  const script = preCommitHookScript('/repo/bin kb"; rm -rf ~; echo "$(whoami)`id`.js');
+  assert.match(script, /^#!\/bin\/sh\nnode "[^\n]*" git-gate-check\n$/);
+  const quoted = script.match(/node "([^\n]*)" git-gate-check\n$/)[1];
+  assert.equal(
+    quoted,
+    '/repo/bin kb\\"; rm -rf ~; echo \\"\\$(whoami)\\`id\\`.js',
+  );
+});
+
 test('installPreCommitHook resolves the hooks dir via git and writes the script there', async () => {
   await withTempDir(async (cwd) => {
     const calls = [];

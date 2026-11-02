@@ -1,8 +1,12 @@
 import { writeFile, mkdir, chmod } from 'node:fs/promises';
 import path from 'node:path';
 
+function escapeDoubleQuotedShellArg(value) {
+  return value.replace(/[\\"$`]/g, '\\$&');
+}
+
 export function preCommitHookScript(binPath) {
-  return `#!/bin/sh\nnode "${binPath}" git-gate-check\n`;
+  return `#!/bin/sh\nnode "${escapeDoubleQuotedShellArg(binPath)}" git-gate-check\n`;
 }
 
 export async function installPreCommitHook({ runCapture, cwd, binPath }) {
