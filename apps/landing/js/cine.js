@@ -410,4 +410,61 @@
   const APPROVE = [22.15, 23.15, -1, 29.95];
   const arbS = track([[25.2, 0], [27.0, sA(3.25)], [28.2, sA(3.25)], [30.8, sA(12.0)]]);
   const arbTurn = (T) => KB.smooth(KB.range(T, 27.8, 28.2));
+
+  // ---------- Estado de reproducción ----------
+  let T = 0, clock = 0, tt = 0;
+  const dust = new KB.Dust(scene, Q.mobile ? 40 : 70, lin("dust"));
+  const DUST = [];
+  [0, 1, 2, 3].forEach((i) => DUST.push({ t0: 14.0 + i * 0.45 + 0.1, x: XB[i], y: -4.3, z: BLOCK_Z, n: 10, spread: 0.7, size: 0.32, rx: 0.3, rz: 0.2, life: 1.2, seed: 5 + i, op: 0.45 }));
+  [0, 1, 2, 3].forEach((i) => DUST.push({ t0: ARR[i] + 0.55, x: PLACE_X[i], y: -15.6, z: BLOCK_Z, n: 9, spread: 0.6, size: 0.3, rx: 0.3, rz: 0.2, life: 1.2, seed: 15 + i, op: 0.4 }));
+  DUST.push({ t0: 2.4, x: XL, y: surfH(XL, LEAF_Z), z: LEAF_Z, n: 16, spread: 1.0, size: 0.45, rx: 1.2, rz: 0.5, life: 1.5, seed: 33, op: 0.5 });
+  DUST.forEach((d) => dust.add(d));
+
+  // ---------- Pose de todo para un T ----------
+  const rp = {}, _P = new THREE.Vector3(), _F = new THREE.Vector3(), _U = new THREE.Vector3(), _Z = new THREE.Vector3(0, 0, 1), _M = new THREE.Matrix4();
+  const _q1 = new THREE.Quaternion(), _q2 = new THREE.Quaternion(), _v = new THREE.Vector3();
+  const QFLAT = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -Math.PI / 2);
+  const QUP = new THREE.Quaternion();
+  const W_POS = W.map(() => new THREE.Vector3()), W_UP = W.map(() => new THREE.Vector3());
+  function poseRoute(id, R, s, z, t, o, outP, outU) {
+    R.at(s, rp); _P.set(rp.x, rp.y, z); _F.set(rp.tx, rp.ty, 0); _U.set(rp.nx, rp.ny, 0);
+    ants.pose(id, _P, _F, _U, s + ((o && o.distAdd) || 0), t, o);
+    if (outP) outP.copy(_P); if (outU) outU.copy(_U);
+  }
+  function poseStatic(id, x, y, z, dir, t, o) { _P.set(x, y, z); _F.set(dir, 0, 0); _U.set(0, 1, 0); ants.pose(id, _P, _F, _U, (o && o.distAdd) || 0, t, o); }
+  function bumpW(T, a, b, ramp) { ramp = ramp || 0.25; return KB.smooth(KB.range(T, a, a + ramp)) * (1 - KB.smooth(KB.range(T, b - ramp, b))); }
+  function uprightQuat(tx, ty, nx, ny, out) { _v.set(tx, ty, 0); _U.set(nx, ny, 0); _F.crossVectors(_v, _U); _M.makeBasis(_v, _U, _F); return out.setFromRotationMatrix(_M); }
+
+  function poseAll(T, t) {
+    // Obreras
+    for (let i = 0; i < 4; i++) {
+      const s = workerS(i, T); ROUTE.at(s, rp); const z = workerLane(i, T, rp.x);
+      const working = bumpW(T, 14.0 + i * 0.45, 15.7 + i * 0.45, 0.2);
+      const tug = i === 2 ? bumpW(T, 24.4, 27.0, 0.3) : 0;
+      const o = { distAdd: tug * 0.08 * Math.sin(T * 9) + working * 0.04 * Math.sin(T * 7 + i), headPitch: working * 0.25 * Math.sin(T * 8 + i) + tug * 0.15, reach: working * 0.6 + tug * 0.5, chew: working * (0.5 + 0.5 * Math.sin(T * 10 + i)) };
+      poseRoute(W[i], ROUTE, s, z, t, o, W_POS[i], W_UP[i]);
+    }
+    // Centinelas
+    const inspectAmt = Math.max(...INSPECT.map((t0) => bumpW(T, t0, t0 + 0.6, 0.15)));
+    const aside = KB.smooth(KB.range(T, 26.4, 26.9)) * (1 - KB.smooth(KB.range(T, 28.9, 29.25)));
+    const s1z = KB.lerp(LANE_F, LANE_B, aside);
+    const s1push = bumpW(T, 24.4, 26.5, 0.3);
+    poseStatic(S1, 3.0 - s1push * 0.06 * Math.sin(T * 9), -8.0, s1z, -1, t, { reach: Math.max(inspectAmt, s1push * 0.7), headYaw: aside * -0.5, headPitch: s1push * 0.15, distAdd: s1push * 0.06 * Math.sin(T * 9) + aside * 0.3, chew: s1push * 0.7 });
+    poseStatic(S2, 1.0, -8.0, LANE_B, -1, t, { headYaw: 0.35 * Math.sin(T * 0.7), reach: 0.15 });
+    // Árbitro
+    const aS = arbS(T); const touch = bumpW(T, 27.0, 27.75, 0.2); const turn = arbTurn(T);
+    ARB.at(aS, rp); const ang = Math.PI * turn;
+    _P.set(rp.x, rp.y, LANE_F); _F.set(-Math.cos(ang), 0, -Math.sin(ang) * 0.9); _U.set(0, 1, 0);
+    ants.pose(ARBI, _P, _F, _U, aS + turn * 0.35, t, { reach: touch, chew: touch * 0.6 });
+    // Nodriza y guardia
+    poseStatic(NURSE, -9.3, -13.5, LANE_F, -1, t, { reach: 0.5 + 0.3 * Math.sin(t * 0.9), headYaw: 0.3, headPitch: 0.1 * Math.sin(t * 1.3) });
+    poseStatic(GUARD, 8.6, -15.6, LANE_B, 1, t, { headYaw: 0.3 * Math.sin(t * 0.5), reach: 0.1 });
+    // Ambiente
+    AMB.forEach((a) => poseRoute(a.id, a.R, ((t * a.sp + a.off * a.R.len) % a.R.len), a.lane, t));
+    SURF.forEach((a) => {
+      const span = 70; const x = -35 + ((t * a.sp + a.off * span) % span);
+      _P.set(x, surfH(x, a.z), a.z); _F.set(1, 0, 0); _U.set(0, 1, 0);
+      ants.pose(a.id, _P, _F, _U, x, t, { ground: surfH });
+    });
+  }
 })();
