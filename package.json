@@ -3,13 +3,15 @@
   "version": "0.2.0",
   "description": "Kebel — lite, token-efficient AI dev orchestrator (TDD-first, cross-AI review, real git gates), for people without large AI subscriptions.",
   "type": "module",
+  "license": "MIT",
   "bin": {
     "kb": "./bin/kb.js"
   },
   "files": [
     "bin",
     "src",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "engines": {
     "node": ">=22.12"
