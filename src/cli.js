@@ -108,18 +108,28 @@ export async function runCli(
       log('Error: falta el título de la ADR. Uso: kb adr add "<título>" [--context "..."] [--decision "..."] [--consequences "..."]');
       return 1;
     }
-    const { filename } = await addAdr({ title, context, decision, consequences });
-    log(`ADR creada: .kebel/adrs/${filename}`);
-    return 0;
+    try {
+      const { filename } = await addAdr({ title, context, decision, consequences });
+      log(`ADR creada: .kebel/adrs/${filename}`);
+      return 0;
+    } catch (error) {
+      log(`Error: ${error.message}`);
+      return 1;
+    }
   }
   if (argv[0] === 'adr' && argv[1] === 'list') {
-    const adrs = await listAdrs({});
-    if (adrs.length === 0) {
-      log('No hay ADRs todavía. Usa "kb adr add <título>" para crear una.');
+    try {
+      const adrs = await listAdrs({});
+      if (adrs.length === 0) {
+        log('No hay ADRs todavía. Usa "kb adr add <título>" para crear una.');
+        return 0;
+      }
+      adrs.forEach((adr) => log(`${adr.filename} — [${adr.status}] ${adr.title} (${adr.date})`));
       return 0;
+    } catch (error) {
+      log(`Error: ${error.message}`);
+      return 1;
     }
-    adrs.forEach((adr) => log(`${adr.filename} — [${adr.status}] ${adr.title} (${adr.date})`));
-    return 0;
   }
   if (argv[0] === 'card' && argv[1] === 'add') {
     const { title, id } = parseCardAddArgs(argv.slice(2));
