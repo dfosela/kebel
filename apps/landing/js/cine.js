@@ -359,4 +359,55 @@
   const AMB = [];
   [[AMB1, 0, 1.35], [AMB1, 0.34, 1.25], [AMB1, 0.67, 1.4], [AMB2, 0.1, 1.2], [AMB2, 0.6, 1.3]].forEach(([R, off, sp], i) => AMB.push({ R, off, sp, id: ants.add({ scale: A_ANT * (0.92 + (i % 3) * 0.05), seed: 60 + i }), lane: i % 2 ? LANE_B : LANE_F }));
   const SURF = [[-3.4, 0.0, 1.5], [-3.4, 0.5, 1.6], [-6.2, 0.25, 1.4], [-6.2, 0.75, 1.5], [-9.5, 0.4, 1.3]].map(([z, off, sp], i) => ({ z, off, sp, id: ants.add({ scale: A_ANT * 0.95, seed: 80 + i }) }));
+
+  // ---------- Coreografía (todo en función de T) ----------
+  const sR = (x, y) => ROUTE.near(x, y);
+  const sA = (x) => ARB.near(x, -8.0);
+  function trap(p) { p = KB.clamp(p, 0, 1); const a = 0.22; const v = 1 / (1 - a); if (p < a) return v * p * p / (2 * a); if (p > 1 - a) { const q = 1 - p; return 1 - v * q * q / (2 * a); } return v * (p - a / 2); }
+  function track(keys) {
+    return (T) => {
+      if (T <= keys[0][0]) return keys[0][1];
+      for (let i = 1; i < keys.length; i++) if (T <= keys[i][0]) { const [t0, s0] = keys[i - 1], [t1, s1] = keys[i]; return s0 + (s1 - s0) * trap((T - t0) / (t1 - t0)); }
+      return keys[keys.length - 1][1];
+    };
+  }
+  const XL = EX - 5;                                  // donde cae la hoja
+  const sLeaf0 = sR(XL, surfH(XL, LEAF_Z));
+  const XA = -7.8;                                    // centro de la hoja en la cámara A
+  const XB = [-9.6, -8.4, -7.2, -6.0];                // piezas en la cámara A
+  const OFF = [-1.2, -0.42, 0.42, 1.2], LANE = [LANE_F, LANE_B, LANE_F, LANE_B];
+  const leafS = track([[4.3, sLeaf0], [10.6, sR(XA, -4.3)]]);
+  const CHK = sR(2.2, -8.0);
+  const WAIT = [sR(6.4, -8), sR(5.6, -8), sR(4.8, -8), sR(4.0, -8)];
+  const PLACE_X = [15.5, 14.9, 14.3, 13.7];
+  const PLACE = PLACE_X.map((x) => sR(x, -15.6));
+  const ARR = [33.6, 33.95, 34.3, 34.65];
+  const wTracks = [0, 1, 2, 3].map((i) => {
+    const start = sLeaf0 - 9.5 - i * 1.05, atLeaf = sLeaf0 + OFF[i], sbuild = sR(XB[i] - 0.78, -4.3);
+    const keys = [[1.1 + i * 0.12, start], [3.4, atLeaf], [4.3, atLeaf]];
+    // durante el acarreo se mueve con la hoja (se calcula aparte), luego:
+    return { start, atLeaf, sbuild, keys };
+  });
+  const wAfter = [
+    track([[11.1, sR(XA, -4.3) + OFF[0]], [12.6, sR(XA, -4.3) + OFF[0]], [13.6, wTracks[0].sbuild], [18.6, wTracks[0].sbuild], [21.6, CHK], [22.25, CHK], [23.2, WAIT[0]], [31.0, WAIT[0]], [ARR[0], PLACE[0]]]),
+    track([[11.1, sR(XA, -4.3) + OFF[1]], [12.6, sR(XA, -4.3) + OFF[1]], [13.6, wTracks[1].sbuild], [18.95, wTracks[1].sbuild], [21.8, CHK - 1.25], [22.25, CHK - 1.25], [22.6, CHK], [23.25, CHK], [24.1, WAIT[1]], [31.3, WAIT[1]], [ARR[1], PLACE[1]]]),
+    track([[11.1, sR(XA, -4.3) + OFF[2]], [12.6, sR(XA, -4.3) + OFF[2]], [13.6, wTracks[2].sbuild], [19.3, wTracks[2].sbuild], [22.0, CHK - 2.5], [22.25, CHK - 2.5], [22.6, CHK - 1.25], [23.25, CHK - 1.25], [23.6, CHK], [28.35, CHK], [29.3, WAIT[2]], [31.6, WAIT[2]], [ARR[2], PLACE[2]]]),
+    track([[11.1, sR(XA, -4.3) + OFF[3]], [12.6, sR(XA, -4.3) + OFF[3]], [13.6, wTracks[3].sbuild], [19.65, wTracks[3].sbuild], [22.2, CHK - 3.75], [22.25, CHK - 3.75], [22.6, CHK - 2.5], [23.25, CHK - 2.5], [23.6, CHK - 1.25], [29.1, CHK - 1.25], [29.4, CHK], [30.0, CHK], [30.7, WAIT[3]], [31.9, WAIT[3]], [ARR[3], PLACE[3]]])
+  ];
+  const wBefore = wTracks.map((w) => track(w.keys));
+  function workerS(i, T) {
+    if (T < 4.3) return wBefore[i](T);
+    if (T < 11.1) return leafS(T) + OFF[i];
+    return wAfter[i](T);
+  }
+  function workerLane(i, T, x) {
+    if (T < 11.1) return LANE[i];
+    const base = KB.lerp(LANE[i], LANE_F, KB.smooth(KB.range(T, 11.1, 12.6)));
+    const inB = T > 21 ? KB.smooth(KB.range(x, 3.3, 3.95)) * (1 - KB.smooth(KB.range(x, 7.0, 7.6))) : 0;
+    return KB.lerp(base, LANE_B, inB);
+  }
+  const INSPECT = [21.6, 22.6, 23.6, 29.4];  // inicio de la revisión de cada pieza
+  const APPROVE = [22.15, 23.15, -1, 29.95];
+  const arbS = track([[25.2, 0], [27.0, sA(3.25)], [28.2, sA(3.25)], [30.8, sA(12.0)]]);
+  const arbTurn = (T) => KB.smooth(KB.range(T, 27.8, 28.2));
 })();
