@@ -1,6 +1,3 @@
-import { existsSync } from 'node:fs';
-import path from 'node:path';
-
 const SOURCE_PATTERN = /^src\/(.+)\.js$/;
 
 export function expectedTestPath(sourceFile) {
@@ -24,12 +21,20 @@ export function evaluateTddCheck({ files, testFileExists }) {
   return { ok: true };
 }
 
-export async function checkTddGate({
-  runCapture,
-  cwd = process.cwd(),
-  fileExists = (relativePath) => existsSync(path.resolve(cwd, relativePath)),
-}) {
-  const { stdout } = await runCapture('git', ['diff', '--cached', '--name-only'], { cwd, timeoutMs: 10_000 });
-  const files = stdout.split('\n').map((f) => f.trim()).filter(Boolean);
-  return evaluateTddCheck({ files, testFileExists: fileExists });
+export async function checkTddGate({ runCapture, cwd = process.cwd(), fileExists }) {
+  const { stdout: changedOut } = await runCapture(
+    'git',
+    ['diff', '--cached', '--name-only', '--diff-filter=ACMR'],
+    { cwd, timeoutMs: 10_000 },
+  );
+  const files = changedOut.split('\n').map((f) => f.trim()).filter(Boolean);
+
+  let testFileExists = fileExists;
+  if (!testFileExists) {
+    const { stdout: trackedOut } = await runCapture('git', ['ls-files'], { cwd, timeoutMs: 10_000 });
+    const tracked = new Set(trackedOut.split('\n').map((f) => f.trim()).filter(Boolean));
+    testFileExists = (relativePath) => tracked.has(relativePath);
+  }
+
+  return evaluateTddCheck({ files, testFileExists });
 }
