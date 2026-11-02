@@ -176,5 +176,38 @@ void main(){
     r.setRenderTarget(null); r.render(this.sV, this.qc);
   };
 
+  // ---------- Polvo analítico (determinista en el tiempo) ----------
+  KB.Dust = function (scene, pool, color) {
+    this.tex = KB.radialTex(false); this.sprites = []; this.events = [];
+    for (let i = 0; i < pool; i++) {
+      const m = new THREE.SpriteMaterial({ map: this.tex, color: color, transparent: true, depthWrite: false, opacity: 0 });
+      const s = new THREE.Sprite(m); s.visible = false; s.renderOrder = 5; scene.add(s); this.sprites.push(s);
+    }
+  };
+  KB.Dust.prototype.setColor = function (c) { this.sprites.forEach((s) => s.material.color.copy(c)); };
+  KB.Dust.prototype.add = function (ev) { this.events.push(Object.assign({ n: 12, spread: 1, size: 0.5, life: 1.4, seed: 1, rx: 0.5, rz: 0.5, op: 0.5 }, ev)); };
+  KB.Dust.prototype.update = function (time) {
+    let k = 0; const sp = this.sprites;
+    for (let e = this.events.length - 1; e >= 0; e--) {
+      const ev = this.events[e]; const tau = time - ev.t0;
+      if (tau > ev.life + 0.1 && ev.temp) { this.events.splice(e, 1); continue; }
+      if (tau < 0 || tau > ev.life) continue;
+      const r = KB.rng(ev.seed * 977 + 13);
+      for (let j = 0; j < ev.n && k < sp.length; j++) {
+        const a = r() * Math.PI * 2, v = (0.5 + r()) * ev.spread, up = 0.3 + 0.6 * r();
+        const ox = Math.cos(a) * ev.rx * r(), oz = Math.sin(a) * ev.rz * r();
+        const hor = v * (1 - Math.exp(-2.6 * tau)) / 2.6;
+        const vert = up * (1 - Math.exp(-2.0 * tau)) / 2.0 * ev.spread - 0.12 * tau * tau;
+        const s = sp[k++];
+        s.visible = true;
+        s.position.set(ev.x + ox + Math.cos(a) * hor, ev.y + Math.max(0, vert) + 0.05, ev.z + oz + Math.sin(a) * hor);
+        const sz = ev.size * (0.35 + 1.15 * (1 - Math.exp(-1.8 * tau))) * (0.6 + 0.8 * r());
+        s.scale.set(sz, sz, 1);
+        s.material.opacity = ev.op * Math.pow(1 - tau / ev.life, 1.5) * Math.min(1, tau * 14);
+      }
+    }
+    for (; k < sp.length; k++) sp[k].visible = false;
+  };
+
   return KB;
 })();
