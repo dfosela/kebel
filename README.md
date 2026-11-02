@@ -26,7 +26,10 @@ Aunque el alcance es reducido, el método no se recorta:
 - **Hallazgos de seguridad no overrideables**, ni siquiera en arbitraje.
 - **Branch-first** — la rama base solo se mueve vía PR.
 - **Gate de git real** — sin veredicto de revisión válido y con el hash del
-  diff intacto, el commit se rechaza.
+  diff intacto, el commit se rechaza. El veredicto se guarda como JSON plano
+  sin firma criptográfica: es un gate de confianza procedimental, no una
+  garantía criptográfica — lo que de verdad importa es la revisión humana
+  antes de mergear.
 
 ## Lo que Kebel SÍ recorta (filosofía lite)
 
