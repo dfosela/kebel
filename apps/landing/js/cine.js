@@ -319,4 +319,44 @@
     });
     if (rootsMat) rootsMat.color.copy(lin("root"));
   }
+
+  // ---------- Hoja, piezas y bloques ----------
+  const LEAF_LEN = 2.6, LEAF_W = 1.25;
+  const CUTS = [-1, -0.45, 0.05, 0.5, 1];
+  const leafMat = new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, roughness: 0.7 });
+  const pieces = CUTS.slice(0, 4).map((u0, i) => {
+    const m = new THREE.Mesh(KB.leafGeo(LEAF_LEN, LEAF_W, u0, CUTS[i + 1]), leafMat); m.castShadow = true; scene.add(m);
+    m.userData.cx = (u0 + CUTS[i + 1]) / 2 * LEAF_LEN / 2; return m;
+  });
+  function roundedBox(s, r, d) {
+    const sh = new THREE.Shape(), h = s / 2;
+    sh.moveTo(-h + r, -h); sh.lineTo(h - r, -h); sh.quadraticCurveTo(h, -h, h, -h + r); sh.lineTo(h, h - r); sh.quadraticCurveTo(h, h, h - r, h);
+    sh.lineTo(-h + r, h); sh.quadraticCurveTo(-h, h, -h, h - r); sh.lineTo(-h, -h + r); sh.quadraticCurveTo(-h, -h, -h + r, -h);
+    const g = new THREE.ExtrudeGeometry(sh, { depth: d, bevelEnabled: true, bevelThickness: 0.05, bevelSize: 0.04, bevelSegments: 3, curveSegments: 6 });
+    g.translate(0, 0, -d / 2); return g;
+  }
+  const blockGeo = roundedBox(0.44, 0.07, 0.38);
+  const BH = 0.26; // medio alto del bloque
+  const blocks = [0, 1, 2, 3].map(() => {
+    const m = new THREE.Mesh(blockGeo, new THREE.MeshStandardMaterial({ roughness: 0.55, bumpMap: grainBump, bumpScale: 0.01, emissive: 0x000000 }));
+    m.castShadow = true; m.receiveShadow = true; scene.add(m); return m;
+  });
+  const oldMat = new THREE.MeshStandardMaterial({ roughness: 0.6, bumpMap: grainBump, bumpScale: 0.01 });
+  const OLD = [[16.3, 0], [16.9, 0], [17.5, 0], [18.1, 0], [16.6, 1], [17.2, 1], [17.8, 1]];
+  OLD.forEach(([x, row], i) => {
+    const m = new THREE.Mesh(blockGeo, oldMat); m.position.set(x, -15.6 + BH + row * 0.53, BLOCK_Z); m.rotation.y = (i % 2 ? 0.04 : -0.05);
+    m.castShadow = true; m.receiveShadow = true; scene.add(m);
+  });
+
+  // ---------- Hormigas ----------
+  const ants = new KB.Ants(scene, 26, Q);
+  const W = [0, 1, 2, 3].map((i) => ants.add({ scale: A_ANT * (0.97 + i * 0.02), seed: 11 + i }));
+  const S1 = ants.add({ scale: A_ANT * 1.05, head: 1.22, mand: 1.25, seed: 41, tint: "#5A2E1E", tintAmt: 0.45 });
+  const S2 = ants.add({ scale: A_ANT * 1.03, head: 1.2, mand: 1.25, seed: 42, tint: "#5A2E1E", tintAmt: 0.45 });
+  const ARBI = ants.add({ scale: A_ANT * 1.2, head: 1.45, gaster: 1.12, mand: 1.7, seed: 43, tint: "#7A5824", tintAmt: 0.3 });
+  const NURSE = ants.add({ scale: A_ANT, seed: 44 });
+  const GUARD = ants.add({ scale: A_ANT, seed: 45 });
+  const AMB = [];
+  [[AMB1, 0, 1.35], [AMB1, 0.34, 1.25], [AMB1, 0.67, 1.4], [AMB2, 0.1, 1.2], [AMB2, 0.6, 1.3]].forEach(([R, off, sp], i) => AMB.push({ R, off, sp, id: ants.add({ scale: A_ANT * (0.92 + (i % 3) * 0.05), seed: 60 + i }), lane: i % 2 ? LANE_B : LANE_F }));
+  const SURF = [[-3.4, 0.0, 1.5], [-3.4, 0.5, 1.6], [-6.2, 0.25, 1.4], [-6.2, 0.75, 1.5], [-9.5, 0.4, 1.3]].map(([z, off, sp], i) => ({ z, off, sp, id: ants.add({ scale: A_ANT * 0.95, seed: 80 + i }) }));
 })();
