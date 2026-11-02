@@ -198,6 +198,36 @@ test('kb adr list prints a helpful message when there are no ADRs yet', async ()
   assert.match(written, /No hay ADRs/);
 });
 
+// Regression coverage for a real audit finding (2026-11-02): adr add/list
+// were the only mutating/reading handlers without a try/catch, so a thrown
+// error (e.g. a filesystem failure) crashed the whole CLI process instead
+// of being reported with a clean exit code, like solomon/card add/move do.
+test('kb adr add reports the error and exits non-zero when addAdr throws', async () => {
+  const fakeAddAdr = async () => {
+    throw new Error('disco lleno');
+  };
+  let written = '';
+  const stdout = { write: (s) => { written += s; } };
+
+  const code = await runCli(['adr', 'add', 'Título'], { version: '0.1.0', stdout, addAdr: fakeAddAdr });
+
+  assert.equal(code, 1);
+  assert.match(written, /Error: disco lleno/);
+});
+
+test('kb adr list reports the error and exits non-zero when listAdrs throws', async () => {
+  const fakeListAdrs = async () => {
+    throw new Error('permiso denegado');
+  };
+  let written = '';
+  const stdout = { write: (s) => { written += s; } };
+
+  const code = await runCli(['adr', 'list'], { version: '0.1.0', stdout, listAdrs: fakeListAdrs });
+
+  assert.equal(code, 1);
+  assert.match(written, /Error: permiso denegado/);
+});
+
 test('kb card add delegates to the injected addCard with the parsed title and id', async () => {
   const calls = [];
   const fakeAddCard = async (opts) => {
