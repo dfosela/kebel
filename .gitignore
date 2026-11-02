@@ -5,10 +5,8 @@ node_modules/
 # against this repo itself, e.g. while manually testing kb)
 .kebel/
 
-# Karajan Code: used locally to build Kebel (dogfooding), but none of its
-# tooling artifacts are meant to be public — this repo is Kebel's, not
-# Karajan's. Everything below stays on disk for continued local work with
-# kj, it just never gets tracked/pushed.
+# Local dev-process tooling, not meant to be public. Everything below
+# stays on disk for continued local work, it just never gets tracked/pushed.
 .kj/
 .agent/
 .scannerwork/
