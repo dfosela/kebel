@@ -23,6 +23,16 @@ test('buildScaffoldContent mentions each configured role and the key kb commands
   assert.match(content, /kb doctor/);
 });
 
+// Regression coverage for a real audit finding (2026-11-02): the scaffold
+// linked to the wrong repo (manufosela/kebel) and suggested running a
+// `kb-tdd-check` command that doesn't exist — the TDD check runs
+// automatically via the git pre-commit hook, not as a `kb` subcommand.
+test('buildScaffoldContent links to the real repo and does not suggest a nonexistent kb-tdd-check command', () => {
+  const content = buildScaffoldContent({ roles: { coder: 'claude', reviewer: null, solomon: null } });
+  assert.match(content, /https:\/\/github\.com\/dfosela\/kebel/);
+  assert.doesNotMatch(content, /`kb-tdd-check`/);
+});
+
 test('writeScaffoldFiles creates AGENTS.md and CLAUDE.md when neither exists', async () => {
   await withTempDir(async (cwd) => {
     const results = await writeScaffoldFiles({ roles: { coder: 'claude', reviewer: null, solomon: null }, cwd });
