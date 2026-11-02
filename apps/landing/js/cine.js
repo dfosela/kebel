@@ -466,5 +466,76 @@
       _P.set(x, surfH(x, a.z), a.z); _F.set(1, 0, 0); _U.set(0, 1, 0);
       ants.pose(a.id, _P, _F, _U, x, t, { ground: surfH });
     });
+
+    // Hoja
+    const showLeaf = T >= 0.6 && T < 16.6;
+    if (T < 2.4) {
+      const p = KB.range(T, 0.6, 2.4), e = KB.easeIn(p * 0.6 + p * 0.4);
+      const x = XL + 1.8 * (1 - p) + Math.sin(p * Math.PI * 2.2) * 0.9 * (1 - p);
+      const y = KB.lerp(7.5, surfH(XL, LEAF_Z) + 0.04, e);
+      _q1.copy(QFLAT); _q2.setFromEuler(new THREE.Euler(Math.sin(p * 9) * 0.5 * (1 - p), p * 1.2, Math.cos(p * 7) * 0.4 * (1 - p)));
+      _q1.premultiply(_q2);
+      pieces.forEach((m) => { m.position.set(x, y, LEAF_Z); m.quaternion.copy(_q1); m.scale.set(1, 1, 1); });
+    } else if (T < 4.3) {
+      const lift = KB.smooth(KB.range(T, 3.6, 4.3));
+      ROUTE.at(sLeaf0, rp); uprightQuat(rp.tx, rp.ty, rp.nx, rp.ny, QUP);
+      _q1.copy(QFLAT).slerp(QUP, lift);
+      const y0 = surfH(XL, LEAF_Z) + 0.04, y1 = rp.y + 0.5 * A_ANT + LEAF_W / 2 + 0.02;
+      pieces.forEach((m) => { m.position.set(KB.lerp(XL, rp.x, lift), KB.lerp(y0, y1, lift), LEAF_Z); m.quaternion.copy(_q1); m.scale.set(1, 1, 1); });
+    } else if (T < 11.1) {
+      ROUTE.at(leafS(T), rp); uprightQuat(rp.tx, rp.ty, rp.nx, rp.ny, QUP);
+      const down = KB.smooth(KB.range(T, 10.6, 11.1));
+      const hgt = KB.lerp(0.5 * A_ANT + LEAF_W / 2 + 0.02, LEAF_W / 2, down);
+      const sway = (1 - down) * 0.05 * Math.sin(T * 6);
+      _q2.setFromAxisAngle(_Z, sway); _q1.copy(QUP).premultiply(_q2);
+      pieces.forEach((m) => { m.position.set(rp.x + rp.nx * hgt, rp.y + rp.ny * hgt, KB.lerp(LEAF_Z, BLOCK_Z, down)); m.quaternion.copy(_q1); m.scale.set(1, 1, 1); });
+    } else {
+      const sp = KB.smooth(KB.range(T, 11.1, 12.6));
+      pieces.forEach((m, i) => {
+        const cx = m.userData.cx; const lean = Math.sin(i * 2.1) * 0.06 * sp;
+        _q1.setFromAxisAngle(_Z, lean);
+        const baseX = XA + cx, tx = XB[i];
+        const morph = KB.smooth(KB.range(T, 14.0 + i * 0.45, 15.4 + i * 0.45));
+        const sy = 1 - morph;
+        m.position.set(KB.lerp(baseX, tx, sp) - cx * sy * 0 - cx, -4.3 + (LEAF_W / 2) * sy + 0.005, BLOCK_Z);
+        m.position.x = KB.lerp(baseX, tx, sp) - cx; // la geometría ya está desplazada cx
+        m.quaternion.copy(_q1); m.scale.set(1, Math.max(0.001, sy), 1);
+        m.visible = sy > 0.01;
+      });
+    }
+    pieces.forEach((m) => { if (T < 11.1) m.visible = showLeaf; });
+
+    // Bloques
+    for (let i = 0; i < 4; i++) {
+      const b = blocks[i];
+      const grow = KB.easeOutBack(KB.range(T, 14.35 + i * 0.45, 15.5 + i * 0.45));
+      if (T < 14.35 + i * 0.45) { b.visible = false; continue; }
+      b.visible = true;
+      const back = _v.copy(W_POS[i]).addScaledVector(W_UP[i], 0.5 * A_ANT + BH + 0.02);
+      const pick = KB.smooth(KB.range(T, 18.0 + i * 0.35, 18.55 + i * 0.35));
+      const drop = KB.range(T, ARR[i] + 0.1, ARR[i] + 0.55);
+      const floorPos = new THREE.Vector3(XB[i], -4.3 + BH, BLOCK_Z);
+      const placePos = new THREE.Vector3(PLACE_X[i], -15.6 + BH, BLOCK_Z);
+      let tug = i === 2 ? bumpW(T, 24.4, 27.0, 0.3) * 0.08 * Math.sin(T * 9) : 0;
+      if (drop > 0) {
+        const e = KB.easeIn(drop);
+        b.position.copy(back).lerp(placePos, e); b.position.y += Math.sin(Math.PI * drop) * 0.25;
+        const u = T - (ARR[i] + 0.55); if (u > 0) b.position.y += 0.06 * Math.exp(-7 * u) * Math.abs(Math.sin(u * 16));
+        b.rotation.set(0, (1 - e) * 0.1 + e * (i % 2 ? 0.03 : -0.04), 0);
+      } else if (pick > 0) {
+        b.position.copy(floorPos).lerp(back, pick); b.position.y += Math.sin(Math.PI * pick) * 0.35; b.position.x += tug;
+        const a = Math.atan2(W_UP[i].x, W_UP[i].y);
+        b.rotation.set(0, 0.06 * Math.sin(T * 3 + i) * (1 - drop), -a * pick);
+      } else {
+        b.position.copy(floorPos); b.rotation.set(0, 0, 0);
+      }
+      b.scale.setScalar(Math.max(0.001, grow));
+      // destellos: aprobada, disputa, decisión
+      let glow = 0;
+      if (APPROVE[i] > 0) glow = Math.exp(-Math.pow((T - APPROVE[i]) / 0.18, 2)) * 0.9;
+      if (i === 2) glow = Math.max(glow, bumpW(T, 24.1, 27.7, 0.15) * (0.35 + 0.25 * Math.sin(T * 12)), Math.exp(-Math.pow((T - 27.75) / 0.22, 2)) * 1.2);
+      b.material.emissive.copy(lin("accent")).multiplyScalar(glow * 0.9);
+    }
+    dust.update(T);
   }
 })();
