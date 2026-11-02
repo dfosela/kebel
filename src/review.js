@@ -1,6 +1,6 @@
 import { hashDiff, getStagedDiff } from './diff.js';
 import { buildReviewPrompt } from './reviewPrompt.js';
-import { getProviderInvocation } from './providerArgs.js';
+import { buildProviderCall } from './providerArgs.js';
 import { parseVerdict } from './verdictParser.js';
 import { saveVerdict } from './verdictStore.js';
 import { loadConfig } from './kebelConfig.js';
@@ -98,15 +98,13 @@ export async function reviewStaged({
   }
 
   const prompt = buildReviewPrompt(diff);
-  const invocation = getProviderInvocation(effectiveReviewer);
-  const args = invocation.promptVia === 'arg' ? [...invocation.baseArgs, prompt] : invocation.baseArgs;
-  const input = invocation.promptVia === 'stdin' ? prompt : undefined;
+  const { args, input, shell } = buildProviderCall(effectiveReviewer, prompt);
 
   log?.(`Revisando con ${effectiveReviewer}...`);
   const { stdout } = await runCapture(effectiveReviewer, args, {
     timeoutMs: 180_000,
     cwd,
-    shell: invocation.shell,
+    shell,
     input,
   });
   const { verdict, reason, securityFinding } = parseVerdict(stdout);

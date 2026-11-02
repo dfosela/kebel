@@ -23,3 +23,10 @@ export function getProviderInvocation(provider) {
   }
   return invocation;
 }
+
+export function buildProviderCall(provider, prompt) {
+  const invocation = getProviderInvocation(provider);
+  const args = invocation.promptVia === 'arg' ? [...invocation.baseArgs, prompt] : invocation.baseArgs;
+  const input = invocation.promptVia === 'stdin' ? prompt : undefined;
+  return { args, input, shell: invocation.shell };
+}
