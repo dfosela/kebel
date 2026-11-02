@@ -1,5 +1,5 @@
 import { loadConfig } from './kebelConfig.js';
-import { getProviderInvocation } from './providerArgs.js';
+import { buildProviderCall } from './providerArgs.js';
 import { run as defaultRun, runCapture as defaultRunCapture } from './exec.js';
 import { classifyProviderError } from './doctorFormat.js';
 
@@ -22,12 +22,10 @@ export async function checkProvider({ provider, run, runCapture }) {
     return { provider, ok: false, reason: 'binario no encontrado en PATH' };
   }
 
-  const invocation = getProviderInvocation(provider);
-  const args = invocation.promptVia === 'arg' ? [...invocation.baseArgs, PING_PROMPT] : invocation.baseArgs;
-  const input = invocation.promptVia === 'stdin' ? PING_PROMPT : undefined;
+  const { args, input, shell } = buildProviderCall(provider, PING_PROMPT);
 
   try {
-    await runCapture(provider, args, { timeoutMs: 60_000, shell: invocation.shell, input });
+    await runCapture(provider, args, { timeoutMs: 60_000, shell, input });
     return { provider, ok: true };
   } catch (error) {
     const detail = [error.stderr, error.stdout, error.message].filter(Boolean).join('\n');

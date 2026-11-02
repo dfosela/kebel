@@ -1,6 +1,6 @@
 import { hashDiff, getStagedDiff } from './diff.js';
 import { buildSolomonPrompt } from './solomonPrompt.js';
-import { getProviderInvocation } from './providerArgs.js';
+import { buildProviderCall } from './providerArgs.js';
 import { parseVerdict } from './verdictParser.js';
 import { loadVerdict, saveVerdict } from './verdictStore.js';
 import { loadConfig } from './kebelConfig.js';
@@ -39,15 +39,13 @@ export async function runSolomon({ runCapture, cwd = process.cwd(), solomon, log
   }
 
   const prompt = buildSolomonPrompt({ diff, previousReason: previous.reason });
-  const invocation = getProviderInvocation(effectiveSolomon);
-  const args = invocation.promptVia === 'arg' ? [...invocation.baseArgs, prompt] : invocation.baseArgs;
-  const input = invocation.promptVia === 'stdin' ? prompt : undefined;
+  const { args, input, shell } = buildProviderCall(effectiveSolomon, prompt);
 
   log?.(`Arbitrando con ${effectiveSolomon}...`);
   const { stdout } = await runCapture(effectiveSolomon, args, {
     timeoutMs: 180_000,
     cwd,
-    shell: invocation.shell,
+    shell,
     input,
   });
   const { verdict, reason, securityFinding } = parseVerdict(stdout);
