@@ -209,5 +209,78 @@ void main(){
     for (; k < sp.length; k++) sp[k].visible = false;
   };
 
+  // ---------- Hormigas 3D ----------
+  const SPH = 5, CYL = 30, STR = 0.11;
+  const LEGS = [
+    { hx: 0.12, hy: 0.24, hz: 0.055, rx: 0.42, rz: 0.30, a: 0.22, b: 0.25, g: 0 },
+    { hx: 0.035, hy: 0.235, hz: 0.065, rx: 0.05, rz: 0.40, a: 0.24, b: 0.28, g: 1 },
+    { hx: -0.04, hy: 0.235, hz: 0.065, rx: -0.36, rz: 0.36, a: 0.28, b: 0.33, g: 0 }
+  ];
+  const Y = new THREE.Vector3(0, 1, 0), NO = {};
+  const _f = new THREE.Vector3(), _u = new THREE.Vector3(), _sd = new THREE.Vector3(), _v = new THREE.Vector3(), _mid = new THREE.Vector3();
+  const _H = new THREE.Vector3(), _Cx = new THREE.Vector3(), _Ft = new THREE.Vector3(), _An = new THREE.Vector3(), _K = new THREE.Vector3(), _T2 = new THREE.Vector3();
+  const _pole = new THREE.Vector3(), _d = new THREE.Vector3(), _pp = new THREE.Vector3(), _a = new THREE.Vector3(), _b = new THREE.Vector3();
+  const _B = new THREE.Matrix4(), _L = new THREE.Matrix4(), _M = new THREE.Matrix4(), _Z = new THREE.Matrix4().makeScale(0, 0, 0);
+  const _q = new THREE.Quaternion(), _s = new THREE.Vector3(), _e = new THREE.Euler(), _sc = new THREE.Vector3();
+
+  function ik(C, A, a, b, pole, out) {
+    _d.subVectors(A, C); let d = _d.length() || 1e-4; _d.multiplyScalar(1 / d);
+    d = KB.clamp(d, Math.abs(a - b) + 1e-4, a + b - 1e-4);
+    const x = (a * a - b * b + d * d) / (2 * d); const h = Math.sqrt(Math.max(0, a * a - x * x));
+    _pp.copy(pole).addScaledVector(_d, -pole.dot(_d)); if (_pp.lengthSq() < 1e-8) _pp.copy(Y); _pp.normalize();
+    out.copy(C).addScaledVector(_d, x).addScaledVector(_pp, h);
+    A.copy(C).addScaledVector(_d, d); // si la pata no llega, el tobillo se acerca
+  }
+
+  KB.Ants = function (scene, max, q) {
+    const low = q && q.mobile;
+    const sph = new THREE.SphereGeometry(1, low ? 12 : 18, low ? 9 : 13);
+    const cyl = new THREE.CylinderGeometry(0.78, 1, 1, 6, 1, false);
+    this.mat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.32, metalness: 0.06 });
+    this.sph = new THREE.InstancedMesh(sph, this.mat, max * SPH);
+    this.cyl = new THREE.InstancedMesh(cyl, this.mat, max * CYL);
+    const bg = new THREE.PlaneGeometry(1, 1); bg.rotateX(-Math.PI / 2);
+    this.blobMat = new THREE.MeshBasicMaterial({ map: KB.radialTex(true), color: 0x000000, transparent: true, opacity: 0.42, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+    this.blob = new THREE.InstancedMesh(bg, this.blobMat, max);
+    [this.sph, this.cyl, this.blob].forEach((m) => { m.frustumCulled = false; m.instanceMatrix.setUsage(THREE.DynamicDrawUsage); scene.add(m); });
+    this.sph.castShadow = this.cyl.castShadow = true;
+    this.blob.renderOrder = 1;
+    for (let i = 0; i < max * SPH; i++) this.sph.setMatrixAt(i, _Z);
+    for (let i = 0; i < max * CYL; i++) this.cyl.setMatrixAt(i, _Z);
+    for (let i = 0; i < max; i++) this.blob.setMatrixAt(i, _Z);
+    this.max = max; this.list = [];
+  };
+  KB.Ants.prototype.add = function (o) {
+    o = o || {}; const r = KB.rng((o.seed || this.list.length + 1) * 7919);
+    const a = {
+      scale: o.scale || (0.92 + r() * 0.16), head: o.head || (0.95 + r() * 0.1), gaster: o.gaster || (0.92 + r() * 0.16),
+      legLen: o.legLen || (0.97 + r() * 0.06), spread: 0.96 + r() * 0.08, mand: o.mand || 1, ant: 0.92 + r() * 0.16,
+      ph0: r(), wob: r() * 20, light: (r() - 0.5) * 0.1, hue: (r() - 0.5) * 0.02, tint: o.tint || null, tintAmt: o.tintAmt || 0
+    };
+    this.list.push(a); return this.list.length - 1;
+  };
+  KB.Ants.prototype.setColors = function (hex) {
+    const base = KB.lin(hex); const c = new THREE.Color();
+    this.list.forEach((a, i) => {
+      c.copy(base); if (a.tint) c.lerp(KB.lin(a.tint), a.tintAmt); c.offsetHSL(a.hue, 0, a.light * 0.25);
+      for (let k = 0; k < SPH; k++) this.sph.setColorAt(i * SPH + k, c);
+      for (let k = 0; k < CYL; k++) this.cyl.setColorAt(i * CYL + k, c);
+    });
+    if (this.sph.instanceColor) this.sph.instanceColor.needsUpdate = true;
+    if (this.cyl.instanceColor) this.cyl.instanceColor.needsUpdate = true;
+  };
+  KB.Ants.prototype.hide = function (i) {
+    for (let k = 0; k < SPH; k++) this.sph.setMatrixAt(i * SPH + k, _Z);
+    for (let k = 0; k < CYL; k++) this.cyl.setMatrixAt(i * CYL + k, _Z);
+    this.blob.setMatrixAt(i, _Z);
+  };
+  KB.Ants.prototype.seg = function (idx, A, Bp, r) {
+    _v.subVectors(Bp, A); const len = _v.length();
+    if (len < 1e-5) { this.cyl.setMatrixAt(idx, _Z); return; }
+    _q.setFromUnitVectors(Y, _v.multiplyScalar(1 / len));
+    _mid.addVectors(A, Bp).multiplyScalar(0.5); _s.set(r, len, r);
+    _M.compose(_mid, _q, _s); this.cyl.setMatrixAt(idx, _M);
+  };
+
   return KB;
 })();
