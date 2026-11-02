@@ -17,6 +17,13 @@
   --band-muted: #A29D93;
   --band-line: #34312C;
 
+  /* Paleta de tierra/piedra para la intro 3D y la cinemática del hormiguero */
+  --soil-a: #DDD5C5; --soil-b: #CABEA8; --soil-sand: #E8DFCD; --soil-hole: #2B241D;
+  --humus: #5C4836; --soil-mid: #B9A07B; --soil-light: #D2BF9C; --soil-clay: #A07A57; --soil-deep: #80614A; --tunnel: #4A3829;
+  --stone-a: #B9AE9D; --stone-b: #9D907D; --stone-c: #D2C8B6;
+  --ant-body: #231E1A; --leaf-dry: #A58E5F; --grass: #8A8756;
+  --egg: #F1EBDF; --root: #8A6A4A; --seed: #6B4A2B; --dust: #EBE3D4;
+
   --font-display: "Bricolage Grotesque", "Arial Black", system-ui, sans-serif;
   --font-body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
@@ -31,6 +38,11 @@
     --bg: #141311; --surface: #1C1B18; --ink: #ECE8E0; --muted: #9B968C; --line: #2F2C27;
     --accent: #CFA65C; --accent-deep: #8C6A2E; --ant: #E2DCD0; --leaf: #8F8D5E; --leaf-vein: #6E6C45;
     --band-bg: #ECE8E0; --band-fg: #1B1A18; --band-muted: #5E5A53; --band-line: #CFCAC0;
+    --soil-a: #3B352D; --soil-b: #2F2A24; --soil-sand: #4A4237; --soil-hole: #0C0A08;
+    --humus: #231A13; --soil-mid: #5A4936; --soil-light: #6B5842; --soil-clay: #533D2B; --soil-deep: #3F2E20; --tunnel: #17110C;
+    --stone-a: #5B5347; --stone-b: #474037; --stone-c: #6B6153;
+    --ant-body: #110E0C; --leaf-dry: #7A6844; --grass: #5E5C3A;
+    --egg: #CFC6B4; --root: #4E3B2A; --seed: #3E2B19; --dust: #6E6455;
     color-scheme: dark;
   }
 }
@@ -38,6 +50,11 @@
   --bg: #141311; --surface: #1C1B18; --ink: #ECE8E0; --muted: #9B968C; --line: #2F2C27;
   --accent: #CFA65C; --accent-deep: #8C6A2E; --ant: #E2DCD0; --leaf: #8F8D5E; --leaf-vein: #6E6C45;
   --band-bg: #ECE8E0; --band-fg: #1B1A18; --band-muted: #5E5A53; --band-line: #CFCAC0;
+  --soil-a: #3B352D; --soil-b: #2F2A24; --soil-sand: #4A4237; --soil-hole: #0C0A08;
+  --humus: #231A13; --soil-mid: #5A4936; --soil-light: #6B5842; --soil-clay: #533D2B; --soil-deep: #3F2E20; --tunnel: #17110C;
+  --stone-a: #5B5347; --stone-b: #474037; --stone-c: #6B6153;
+  --ant-body: #110E0C; --leaf-dry: #7A6844; --grass: #5E5C3A;
+  --egg: #CFC6B4; --root: #4E3B2A; --seed: #3E2B19; --dust: #6E6455;
   color-scheme: dark;
 }
 
