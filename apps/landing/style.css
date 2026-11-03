@@ -111,6 +111,20 @@ body.is-revealed .nav { transform: none; }
 .nav-links .nav-cta { color: var(--ink); font-weight: 600; }
 @media (max-width: 640px) { .nav-links li:not(:last-child) { display: none; } }
 
+/* Selector 2D/3D de la intro, junto al logo */
+.modes {
+  display: inline-flex; padding: 3px; gap: 2px; border-radius: 999px;
+  background: color-mix(in srgb, var(--bg) 78%, transparent); border: 1px solid var(--line);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+.modes button {
+  font: 500 .78rem/1 var(--font-mono); letter-spacing: .02em; padding: 7px 12px; border-radius: 999px;
+  border: 0; background: transparent; color: var(--muted); cursor: pointer; transition: background .2s, color .2s;
+}
+.modes button:hover { color: var(--ink); }
+.modes button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.modes button:disabled { opacity: .4; cursor: default; }
+
 /* ---------- Hero / intro ---------- */
 .hero {
   position: relative; height: 100svh; min-height: 560px; overflow: hidden;
