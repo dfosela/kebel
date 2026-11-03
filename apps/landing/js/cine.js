@@ -15,7 +15,7 @@
     { t0: 31, name: "Despensa", text: "El resultado queda ordenado en la despensa. Tú solo miras." }
   ];
   const TEND = 38.5;          // fin de la explicación
-  const EXIT0 = 36.6, EXIT1 = 42.2; // subida por el túnel hasta la salida
+  const EXIT0 = 36.6, EXIT1 = 39.4; // subida por el túnel hasta la salida (más fluida: mitad de duración, mismas proporciones)
   const INTRO_URL = "index.html";
 
   const root = document.getElementById("cine");
@@ -595,7 +595,7 @@
   const exitPosC = new THREE.CatmullRomCurve3(EXIT_POS, false, "centripetal"), exitLookC = new THREE.CatmullRomCurve3(EXIT_LOOK, false, "centripetal");
   function exitShot(T, out) {
     // ritmo: bajar a la boca del túnel, subir despacio y asomarse fuera
-    const u = T < 38.4 ? 0.3 * KB.easeInOut(KB.range(T, EXIT0, 38.4)) : T < 40.6 ? 0.3 + 0.52 * KB.smooth(KB.range(T, 38.4, 40.6)) : 0.82 + 0.18 * KB.easeOut(KB.range(T, 40.6, EXIT1));
+    const u = T < 37.5 ? 0.3 * KB.easeInOut(KB.range(T, EXIT0, 37.5)) : T < 38.6 ? 0.3 + 0.52 * KB.smooth(KB.range(T, 37.5, 38.6)) : 0.82 + 0.18 * KB.easeOut(KB.range(T, 38.6, EXIT1));
     out.pos = exitPosC.getPointAt(u); out.look = exitLookC.getPointAt(u); out.wide = KB.smooth(1 - u * 3);
     if (u < 0.2) { const p0 = fit(EXIT_LOOK[0], new THREE.Vector3(0, 3, 48), 44, new THREE.Vector3()); out.pos.lerp(p0, 1 - u / 0.2); }
     out.exit = true;
@@ -635,7 +635,7 @@
   function leave() {
     if (leaving) return; leaving = true;
     ui.fade.classList.add("light", "on");
-    setTimeout(() => { location.href = INTRO_URL + "#desde-cinematica"; }, 600);
+    setTimeout(() => { location.href = INTRO_URL + "#desde-cinematica"; }, 320);
   }
   ui.close.addEventListener("click", skipToExit);
   window.addEventListener("keydown", (e) => { if (e.key === "Escape") { e.preventDefault(); skipToExit(); } });
@@ -659,7 +659,7 @@
     raf = requestAnimationFrame(frame);
     const dt = Math.min(0.05, (now - last) / 1000 || 0); last = now; clock += dt;
     T += dt; tt += dt;
-    if (T >= EXIT1 - 0.55) leave();
+    if (T >= EXIT1 - 0.3) leave();
     try {
     updateUI();
     poseAll(T, tt + T * 0.0);
