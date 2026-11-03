@@ -14,31 +14,36 @@
 </head>
 <body>
 
-<header class="nav" id="nav">
-  <div class="wrap nav-inner">
-    <a class="logo" href="#hero" aria-label="Kebel, volver al inicio">
-      <img class="ant-logo" src="img/kebel-logo.png" alt="" width="32" height="32">
-    </a>
-    <ul class="nav-links">
-      <li><a href="#instalar">Instalar</a></li>
-      <li><a href="#que-es">Qué es</a></li>
-      <li><a href="#flujo">Cómo funciona</a></li>
-      <li><a class="nav-cta" href="https://www.npmjs.com/package/kebel">npm →</a></li>
-    </ul>
-  </div>
-</header>
-
-<section class="hero" id="hero">
-  <canvas id="scene" aria-hidden="true"></canvas>
+<section class="hero" id="hero" aria-label="Kebel">
+  <canvas id="scene" class="scene" aria-hidden="true" hidden></canvas>
+  <canvas id="scene2d" class="scene" aria-hidden="true" hidden></canvas>
+  <header class="nav" id="nav">
+    <div class="wrap nav-inner">
+      <a class="logo" href="#hero" aria-label="Kebel, volver al inicio">
+        <img class="ant-logo" src="img/kebel-logo.png" alt="" width="32" height="32">
+      </a>
+      <div class="modes" role="group" aria-label="Versión de la animación">
+        <button type="button" data-mode="2d" aria-pressed="false">2D</button>
+        <button type="button" data-mode="3d" aria-pressed="true">3D</button>
+      </div>
+      <ul class="nav-links">
+        <li><a href="#instalar">Instalar</a></li>
+        <li><a href="#que-es">Qué es</a></li>
+        <li><a href="#flujo">Cómo funciona</a></li>
+        <li><a class="nav-cta" href="https://www.npmjs.com/package/kebel">npm →</a></li>
+      </ul>
+    </div>
+  </header>
   <h1 class="sr-only">Kebel</h1>
-  <div class="fallback-mark" aria-hidden="true"><span>K</span><span>E</span><span>B</span><span>E</span><span>L</span></div>
-  <div class="hero-copy">
-    <p class="hero-lead">Un orquestador de IA ligero. Tú dejas caer la idea; el hormiguero se organiza.</p>
-    <a class="scroll-cue" href="#instalar">scroll
-      <svg width="12" height="14" viewBox="0 0 12 14" fill="none" aria-hidden="true"><path d="M6 1v11M1.5 7.5 6 12l4.5-4.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <div class="fallback-mark" aria-hidden="true">KEBEL</div>
+  <div class="hero-copy" id="heroCopy">
+    <p class="hero-lead">Un orquestador de IA ligero. <b>Tú dejas caer la idea; el hormiguero se organiza.</b></p>
+    <a class="btn-how" id="howBtn" href="como-funciona.html#desde-intro">Ver cómo funciona
+      <svg width="12" height="14" viewBox="0 0 12 14" fill="none" aria-hidden="true"><path d="M6 1v11M1.5 7.5 6 12l4.5-4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </a>
   </div>
   <button class="skip" id="skip" type="button">Saltar intro</button>
+  <div class="fade" id="fade" aria-hidden="true"></div>
 </section>
 
 <main>
@@ -159,7 +164,11 @@
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha512-dLxUelApnYxpLt6K2iomGngnHO83iUvZytA3YjDUCjT0HDOHKXnVYdf3hU4JjM8uEhxf9nD1/ey98U3t2vZ0qQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="script.js"></script>
+<script src="js/core.js"></script>
+<script src="js/intro2d.js"></script>
+<script src="js/intro3d.js"></script>
+<script src="js/host.js"></script>
+<script src="js/copy-command.js"></script>
 
 </body>
 </html>

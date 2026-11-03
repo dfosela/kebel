@@ -19,11 +19,25 @@ y abre `http://localhost:4000`.
 
 ## Estructura
 
-- `index.html` — estructura y contenido (navbar, hero, secciones, footer).
-- `style.css` — estilos, variables CSS de color/tipografía y responsive.
-- `script.js` — la escena three.js (hormigas, letras, física del ratón,
-  reduced-motion, fallback sin WebGL) y la interacción de la página
-  (copiar comando de instalación, etc.).
+- `index.html` — página principal (navbar con selector 2D/3D, hero con la
+  intro animada, secciones, footer).
+- `como-funciona.html` — animación explicativa aparte ("cómo funciona"):
+  corte transversal del hormiguero, se reproduce sola y vuelve a la intro.
+- `style.css` — estilos y variables CSS compartidas (color/tipografía,
+  responsive, paleta de tierra/piedra para las escenas 3D).
+- `css/cinematica.css` — layout propio de `como-funciona.html` (los
+  colores salen de `style.css`).
+- `js/core.js` — utilidades 3D compartidas por la intro y la cinemática
+  (ruido, texturas generadas, postproceso de profundidad de campo,
+  hormigas articuladas, geometría de la hoja).
+- `js/intro2d.js` / `js/intro3d.js` — las dos versiones de la intro
+  (cenital plana / macro con profundidad real), cada una una fábrica
+  independiente que `js/host.js` activa según el modo elegido.
+- `js/host.js` — decide qué versión de la intro mostrar, el selector
+  2D/3D, "saltar intro" y la navegación hacia/desde `como-funciona.html`.
+- `js/cine.js` — la coreografía de `como-funciona.html`.
+- `js/copy-command.js` — copiar el comando de instalación al portapapeles
+  (independiente de las escenas 3D).
 
 ## Paleta
 
