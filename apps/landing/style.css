@@ -9,6 +9,7 @@
   --line: #DCD8CF;
   --accent: #A97C35;
   --accent-deep: #7A5824;
+  --band-accent: #CFA65C;
   --on-accent: #FFFDF8;
   --ant: #2A2622;
   --leaf: #7D7B52;
@@ -37,7 +38,7 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #141311; --surface: #1C1B18; --ink: #ECE8E0; --muted: #9B968C; --line: #2F2C27;
-    --accent: #CFA65C; --accent-deep: #8C6A2E; --on-accent: #1B1A18; --ant: #E2DCD0; --leaf: #8F8D5E; --leaf-vein: #6E6C45;
+    --accent: #CFA65C; --accent-deep: #8C6A2E; --band-accent: #7A5824; --on-accent: #1B1A18; --ant: #E2DCD0; --leaf: #8F8D5E; --leaf-vein: #6E6C45;
     --band-bg: #ECE8E0; --band-fg: #1B1A18; --band-muted: #5E5A53; --band-line: #CFCAC0;
     --soil-a: #3B352D; --soil-b: #2F2A24; --soil-sand: #4A4237; --soil-hole: #0C0A08;
     --humus: #231A13; --soil-mid: #5A4936; --soil-light: #6B5842; --soil-clay: #533D2B; --soil-deep: #3F2E20; --tunnel: #17110C;
@@ -49,7 +50,7 @@
 }
 :root[data-theme="dark"] {
   --bg: #141311; --surface: #1C1B18; --ink: #ECE8E0; --muted: #9B968C; --line: #2F2C27;
-  --accent: #CFA65C; --accent-deep: #8C6A2E; --on-accent: #1B1A18; --ant: #E2DCD0; --leaf: #8F8D5E; --leaf-vein: #6E6C45;
+  --accent: #CFA65C; --accent-deep: #8C6A2E; --band-accent: #7A5824; --on-accent: #1B1A18; --ant: #E2DCD0; --leaf: #8F8D5E; --leaf-vein: #6E6C45;
   --band-bg: #ECE8E0; --band-fg: #1B1A18; --band-muted: #5E5A53; --band-line: #CFCAC0;
   --soil-a: #3B352D; --soil-b: #2F2A24; --soil-sand: #4A4237; --soil-hole: #0C0A08;
   --humus: #231A13; --soil-mid: #5A4936; --soil-light: #6B5842; --soil-clay: #533D2B; --soil-deep: #3F2E20; --tunnel: #17110C;
@@ -101,8 +102,7 @@ a { color: inherit; }
 .is-leaving .nav { opacity: 0; transition: opacity .4s; }
 .nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 14px; }
 .nav-brand { display: flex; align-items: center; gap: 14px; }
-.logo { font-family: var(--font-display); font-weight: 800; font-size: 1.3rem; letter-spacing: -0.02em; text-decoration: none; }
-.logo { display: inline-flex; align-items: center; color: var(--ink); }
+.logo { font-family: var(--font-display); font-weight: 800; font-size: 1.3rem; letter-spacing: -0.02em; text-decoration: none; display: inline-flex; align-items: center; color: var(--ink); }
 .ant-logo { width: 32px; height: 32px; display: block; object-fit: cover; border-radius: 50%; transition: transform .35s cubic-bezier(.2,.7,.2,1); }
 .logo:hover .ant-logo { transform: translateX(4px) rotate(-4deg); }
 .foot .logo { color: var(--band-fg); }
@@ -205,7 +205,7 @@ h3 { font-family: var(--font-display); font-weight: 800; font-size: var(--step-1
 .copy { font: 500 var(--step--1)/1 var(--font-mono); color: var(--band-fg); background: transparent; border: 1px solid var(--band-line); border-radius: 999px; padding: 6px 12px; cursor: pointer; }
 .copy:hover { border-color: var(--band-muted); }
 .cmd pre { margin: 0; padding: 22px 18px; overflow-x: auto; font-family: var(--font-mono); font-size: 0.95rem; }
-.cmd .prompt { color: var(--accent); margin-right: 10px; user-select: none; }
+.cmd .prompt { color: var(--band-accent); margin-right: 10px; user-select: none; }
 .install-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 18px; }
 .install-steps li { border-top: 1px solid var(--line); padding-top: 14px; min-width: 0; }
 .install-steps .step-num { margin-bottom: 6px; }
@@ -232,6 +232,8 @@ h3 { font-family: var(--font-display); font-weight: 800; font-size: var(--step-1
 .step-num { font-family: var(--font-mono); font-size: var(--step--1); color: var(--accent); margin: 0 0 14px; display: flex; align-items: center; gap: 10px; }
 .step-num::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); }
 .steps p { margin: 0; color: var(--band-muted); }
+.band .eyebrow, .band .step-num { color: var(--band-accent); }
+.band .step-num::before { background: var(--band-accent); }
 .loop-note { margin-top: 40px; font-family: var(--font-mono); font-size: var(--step--1); color: var(--band-muted); }
 @media (max-width: 860px) {
   .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 40px; }
