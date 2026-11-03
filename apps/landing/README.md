@@ -39,13 +39,11 @@ y abre `http://localhost:4000`.
 - `js/copy-command.js` — copiar el comando de instalación al portapapeles
   (independiente de las escenas 3D).
 
-## Paleta
+## Paleta y tipografía
 
-Exactamente la de [daniel.fosela.com](https://daniel.fosela.com) — valores
+Exactamente las de [daniel.fosela.com](https://daniel.fosela.com) — valores
 en `style.css` (`:root`), con soporte de modo oscuro vía
-`prefers-color-scheme` / `[data-theme]`.
-
-## Pendiente
-
-- Confirmar la tipografía real del portfolio (actualmente Bricolage
-  Grotesque + Instrument Sans + JetBrains Mono, a revisar).
+`prefers-color-scheme` / `[data-theme]`. Tipografía: Bricolage Grotesque
+(display) + DM Sans (cuerpo), igual que el portfolio; JetBrains Mono se
+mantiene aparte para lo específico de terminal/CLI de esta landing, que no
+tiene equivalente en el portfolio.
