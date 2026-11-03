@@ -20,5 +20,6 @@ GEMINI.md
 commitlint.config.js
 .editorconfig
 TASKS.md
+PROJECT.md
 /.github/workflows/kj-no-ai-attribution.yml
 /.github/workflows/kj-quality.yml
