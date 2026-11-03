@@ -49,4 +49,3 @@ en `style.css` (`:root`), con soporte de modo oscuro vía
 
 - Confirmar la tipografía real del portfolio (actualmente Bricolage
   Grotesque + Instrument Sans + JetBrains Mono, a revisar).
-- Rellenar los iconos placeholder de la sección "por qué" con SVGs reales.
