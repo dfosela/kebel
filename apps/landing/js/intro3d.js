@@ -642,7 +642,7 @@ window.KebelIntro3D = function (host, opts) {
     for (let i = 0; i < 8; i++) step(0.25);
     reveal(); startCalm(); speedMul = CONFIG.calmSpeed; step(0);
   }
-  if (fromCine && !reduce) flight = { t0: 0, dur: 2.4, dir: -1 };
+  if (fromCine && !reduce) flight = { t0: 0, dur: 1.2, dir: -1 };
 
   let wired = false;
   function wire() {

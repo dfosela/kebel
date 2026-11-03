@@ -78,7 +78,7 @@ button { font: inherit; color: inherit; }
 .end .row { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
 .end a.ctl { text-decoration: none; }
 
-.fade { position: absolute; inset: 0; z-index: 9; background: var(--soil-hole); opacity: 0; pointer-events: none; transition: opacity .55s ease; }
+.fade { position: absolute; inset: 0; z-index: 9; background: var(--soil-hole); opacity: 0; pointer-events: none; transition: opacity .3s ease; }
 .fade.light { background: var(--bg); }
 .fade.on { opacity: 1; }
 .fade.instant { transition: none; }
