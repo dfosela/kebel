@@ -100,6 +100,7 @@ a { color: inherit; }
 }
 .is-leaving .nav { opacity: 0; transition: opacity .4s; }
 .nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 14px; }
+.nav-brand { display: flex; align-items: center; gap: 14px; }
 .logo { font-family: var(--font-display); font-weight: 800; font-size: 1.3rem; letter-spacing: -0.02em; text-decoration: none; }
 .logo { display: inline-flex; align-items: center; color: var(--ink); }
 .ant-logo { width: 32px; height: 32px; display: block; object-fit: cover; border-radius: 50%; transition: transform .35s cubic-bezier(.2,.7,.2,1); }
