@@ -26,7 +26,7 @@
   --egg: #F1EBDF; --root: #8A6A4A; --seed: #6B4A2B; --dust: #EBE3D4;
 
   --font-display: "Bricolage Grotesque", "Arial Black", system-ui, sans-serif;
-  --font-body: "Instrument Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 
   --step--1: clamp(0.8rem, 0.78rem + 0.1vw, 0.86rem);
@@ -153,7 +153,7 @@ a { color: inherit; }
 
 .btn-how {
   display: inline-flex; align-items: center; gap: 10px; text-decoration: none;
-  font: 600 1rem/1 var(--font-body); color: var(--on-accent); background: var(--accent);
+  font: 700 1rem/1 var(--font-body); color: var(--on-accent); background: var(--accent);
   padding: 14px 22px; border-radius: 999px; border: 0; cursor: pointer;
   box-shadow: 0 1px 0 rgba(0,0,0,.08), 0 8px 24px -12px color-mix(in srgb, var(--accent-deep) 80%, transparent);
   transition: background .2s, transform .2s;
