@@ -1,19 +1,9 @@
-(function () {
+/* ============================================================
+   Kebel · Intro 2D (la versión anterior, plana y vista desde arriba)
+   ============================================================ */
+window.KebelIntro2D = function (host, opts) {
   "use strict";
-  // Copiar comando
-  (function () {
-    const btn = document.getElementById("copyCmd");
-    const code = document.getElementById("cmdText");
-    if (!btn || !code) return;
-    btn.addEventListener("click", () => {
-      const text = code.textContent.replace(/^\s*\$\s*/, "");
-      const done = () => { btn.textContent = "copiado"; setTimeout(() => { btn.textContent = "copiar"; }, 1600); };
-      const fallback = () => { const r = document.createRange(); r.selectNodeContents(code); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); };
-      try { navigator.clipboard.writeText(text).then(done, fallback); } catch (e) { fallback(); }
-    });
-  })();
-
-
+  opts = opts || {};
   // ---------- Parámetros ajustables ----------
   const CONFIG = {
     viewHeight: 10,        // alto del mundo en unidades
@@ -38,26 +28,24 @@
   const WORD = ["K", "E", "B", "E", "L"];
 
   const hero = document.getElementById("hero");
-  const canvas = document.getElementById("scene");
-  const skipBtn = document.getElementById("skip");
+  const canvas = document.getElementById("scene2d");
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  let revealed = false;
+  let revealed = false, active = false, inited = false;
   function reveal() {
     if (revealed) return;
     revealed = true;
-    document.body.classList.add("is-revealed");
+    host.reveal("2d");
   }
-  setTimeout(reveal, 14000); // red de seguridad
+  let safety = 0;
 
-  function fallback() { hero.classList.add("no-gl"); reveal(); }
-  if (!window.THREE) { fallback(); return; }
+  if (!window.THREE) return null;
 
   let renderer;
   try {
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-  } catch (e) { fallback(); return; }
-  if (!renderer || !renderer.getContext()) { fallback(); return; }
+  } catch (e) { return null; }
+  if (!renderer || !renderer.getContext()) return null;
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.setClearColor(0x000000, 0);
 
@@ -110,7 +98,7 @@
       m.front.color.set(css("--accent"));
       m.deep.color.set(css("--accent-deep"));
     });
-    if (reduceMotion) requestRender();
+    if (reduceMotion && active) requestRender();
   }
   window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyColors);
   new MutationObserver(applyColors).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme", "class", "style"] });
@@ -148,7 +136,8 @@
     let lowest = Infinity;
     for (let x = -L.W * 0.35; x <= L.W * 0.35; x += 0.1) lowest = Math.min(lowest, trailY(x));
     const screenY = ((L.H / 2 - (lowest - 0.6 * L.s)) / L.H) * h;
-    hero.style.setProperty("--copy-top", Math.round(screenY) + "px");
+    L.copyTop = Math.round(screenY);
+    if (active) hero.style.setProperty("--copy-top", L.copyTop + "px");
   }
 
   function trailY(x) {
@@ -503,7 +492,7 @@
     rafId = requestAnimationFrame(frame);
   }
   function stop() { running = false; cancelAnimationFrame(rafId); }
-  function syncRunning() { (visible && !document.hidden) ? start() : stop(); }
+  function syncRunning() { (active && visible && !document.hidden) ? start() : stop(); }
 
   let pendingRender = false;
   function requestRender() {
@@ -523,7 +512,7 @@
     S = newS;
     ants.forEach((a) => { if (a.kind === "line") a.pos *= k; });
     groups.forEach((g) => { g.pos *= k; });
-    if (reduceMotion) { step(0); requestRender(); }
+    if (reduceMotion && active) { step(0); requestRender(); }
   }
   window.addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(onResize, 120); });
 
@@ -537,25 +526,25 @@
     });
     reveal();
   }
-  skipBtn.addEventListener("click", skipIntro);
-  window.addEventListener("keydown", (e) => { if (!revealed && (e.key === "Escape" || e.key === "Enter")) skipIntro(); });
 
   // ---------- Inicio ----------
   function init() {
     build();
     applyColors();
 
-    if (reduceMotion) {
-      // Estado final: logo montado y hormigas quietas a lo largo de la fila
+    if (reduceMotion || opts.fromCine) {
+      // Estado final: logo montado y la fila repartida por la pantalla
       groups.forEach((g) => { g.skip = true; g.dropped = true; g.lap = 1; g.members.forEach((m) => { m.latBlend = 0; }); });
-      ants.forEach((a, i) => { if (a.kind === "line") { a.pos = ((a.pos % S) + S) % S; } });
+      ants.forEach((a) => { if (a.kind === "line") { a.pos = ((a.pos % S) + S) % S; } });
       groups.forEach((g) => { g.pos = ((g.pos % S) + S) % S; });
       step(0);
       startCalm();
+      speedMul = CONFIG.calmSpeed;
       renderer.render(scene, camera);
       reveal();
-      return;
+      if (reduceMotion) return;
     }
+    safety = setTimeout(reveal, 14000);
 
     const setMouse = (e) => {
       const r = hero.getBoundingClientRect();
@@ -579,5 +568,15 @@
   const fontReady = (document.fonts && document.fonts.load)
     ? document.fonts.load('800 210px "Bricolage Grotesque"').catch(() => {})
     : Promise.resolve();
-  Promise.race([fontReady, new Promise((r) => setTimeout(r, 1500))]).then(init);
-})();
+
+  return {
+    activate() {
+      active = true; canvas.hidden = false;
+      if (!inited) { inited = true; Promise.race([fontReady, new Promise((r) => setTimeout(r, 1500))]).then(init); }
+      else { onResize(); if (L.copyTop) hero.style.setProperty("--copy-top", L.copyTop + "px"); if (reduceMotion) requestRender(); syncRunning(); }
+    },
+    deactivate() { active = false; stop(); canvas.hidden = true; },
+    skip: skipIntro,
+    isRevealed: () => revealed
+  };
+};
