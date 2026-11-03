@@ -61,12 +61,11 @@ sobre-construyendo: hay que decirlo y simplificar antes de escribir código.
 ## Uso
 
 ```sh
-node bin/kb.js --version
-node bin/kb.js --help
-node bin/kb.js setup
+npm install -g kebel
+kb --version
+kb --help
+kb setup
 ```
-
-(Aún no publicado en npm — en desarrollo activo.)
 
 ## Versionado
 
