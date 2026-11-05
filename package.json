@@ -1,5 +1,5 @@
 {
-  "name": "kebel",
+  "name": "kebel-code",
   "version": "0.2.1",
   "description": "Kebel — lite, token-efficient AI dev orchestrator (TDD-first, cross-AI review, real git gates), for people without large AI subscriptions.",
   "type": "module",
