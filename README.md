@@ -100,6 +100,12 @@ Los roles de este repo están fijos, tres familias de modelo distintas:
   del reviewer (`kb solomon`); su veredicto se obedece salvo en hallazgos de
   seguridad, que nunca son overrideables.
 
+## Contribuir
+
+Issues y PRs son bienvenidos. Para bugs, abre un issue; para features
+nuevas, abre antes una [Discussion](https://github.com/dfosela/kebel/discussions)
+en vez de un PR directo. Detalles en [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
 ## Estado (MVP v1)
 
 Dentro: CLI (`kb`), setup con Squeezr por defecto, gate de git real,
