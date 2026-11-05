@@ -61,7 +61,7 @@ sobre-construyendo: hay que decirlo y simplificar antes de escribir código.
 ## Uso
 
 ```sh
-npm install -g kebel
+npm install -g kebel-code
 kb --version
 kb --help
 kb setup
