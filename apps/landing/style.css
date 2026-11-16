@@ -161,6 +161,11 @@ a { color: inherit; }
 .btn-how:hover { background: var(--accent-deep); transform: translateY(-1px); }
 .btn-how svg { transition: transform .25s; }
 .btn-how:hover svg { transform: translateY(2px); }
+.btn-how .ico-play { display: none; }
+.hero[data-mode="2d"] .btn-how .ico-scroll { display: block; }
+.hero[data-mode="2d"] .btn-how .ico-play { display: none; }
+.hero[data-mode="3d"] .btn-how .ico-scroll { display: none; }
+.hero[data-mode="3d"] .btn-how .ico-play { display: block; }
 
 .skip {
   position: absolute; z-index: 5;
@@ -198,19 +203,17 @@ h3 { font-family: var(--font-display); font-weight: 800; font-size: var(--step-1
 
 
 /* Instalación */
-.install-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 32px; margin-top: 44px; align-items: start; }
-.install-cmd-col { min-width: 0; }
+.install-grid { margin-top: 44px; }
 .cmd { margin: 0; background: var(--band-bg); color: var(--band-fg); border-radius: 14px; overflow: hidden; min-width: 0; }
 .cmd-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--band-line); font-family: var(--font-mono); font-size: var(--step--1); color: var(--band-muted); }
 .copy { font: 500 var(--step--1)/1 var(--font-mono); color: var(--band-fg); background: transparent; border: 1px solid var(--band-line); border-radius: 999px; padding: 6px 12px; cursor: pointer; }
 .copy:hover { border-color: var(--band-muted); }
 .cmd pre { margin: 0; padding: 22px 18px; overflow-x: auto; font-family: var(--font-mono); font-size: 0.95rem; }
 .cmd .prompt { color: var(--accent); margin-right: 10px; user-select: none; }
-.install-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 18px; }
+.install-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 28px; }
 .install-steps li { border-top: 1px solid var(--line); padding-top: 14px; min-width: 0; }
 .install-steps .step-num { margin-bottom: 6px; }
-.install-steps p { margin: 0; color: var(--muted); }
-@media (max-width: 760px) { .install-grid { grid-template-columns: 1fr; } .install-cmd-col { order: -1; } }
+.install-steps p { margin: 0 0 14px; color: var(--muted); }
 
 /* Qué es — roles */
 .roles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; margin-top: 56px; list-style: none; padding: 0; }

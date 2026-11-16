@@ -41,7 +41,8 @@
   <div class="hero-copy" id="heroCopy">
     <p class="hero-lead">Un orquestador de IA ligero. <b>Tú dejas caer la idea; el hormiguero se organiza.</b></p>
     <a class="btn-how" id="howBtn" href="como-funciona.html#desde-intro">Ver cómo funciona
-      <svg width="12" height="14" viewBox="0 0 12 14" fill="none" aria-hidden="true"><path d="M6 1v11M1.5 7.5 6 12l4.5-4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <svg class="ico-scroll" width="12" height="14" viewBox="0 0 12 14" fill="none" aria-hidden="true"><path d="M6 1v11M1.5 7.5 6 12l4.5-4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <svg class="ico-play" width="12" height="14" viewBox="0 0 12 14" fill="none" aria-hidden="true"><path d="M1 1.3v11.4c0 .8.86 1.28 1.54.86l9.2-5.7a1 1 0 0 0 0-1.72l-9.2-5.7C1.86.02 1 .5 1 1.3Z" fill="currentColor"/></svg>
     </a>
   </div>
   <button class="skip" id="skip" type="button">Saltar intro</button>
@@ -56,19 +57,30 @@
       <p class="lede">Kebel se instala como paquete de npm. Solo necesitas Node y una cuenta de Claude, Gemini o ChatGPT.</p>
       <div class="install-grid">
         <ol class="install-steps">
-          <li><span class="step-num">Paso 01</span><p>Instala el paquete con npm.</p></li>
-          <li><span class="step-num">Paso 02</span><p>Conecta tus cuentas de IA. Kebel funciona con Claude, Gemini y ChatGPT. No necesitas las tres: con una ya funciona, aunque conectarlas todas te da los mejores resultados.</p></li>
-          <li><span class="step-num">Paso 03</span><p>Deja caer tu primera idea en la entrada y mira cómo se organiza.</p></li>
+          <li>
+            <span class="step-num">Paso 01</span>
+            <p>Instala el paquete con npm.</p>
+            <figure class="cmd">
+              <figcaption class="cmd-bar"><span>terminal</span><button class="copy" type="button">copiar</button></figcaption>
+              <pre><code><span class="prompt">$</span> npm install -g kebel-code</code></pre>
+            </figure>
+          </li>
+          <li>
+            <span class="step-num">Paso 02</span>
+            <p>Conecta tus cuentas de IA. Kebel funciona con Claude, Gemini y ChatGPT. No necesitas las tres: con una ya funciona, aunque conectarlas todas te da los mejores resultados.</p>
+            <figure class="cmd">
+              <figcaption class="cmd-bar"><span>terminal</span><button class="copy" type="button">copiar</button></figcaption>
+              <pre><code><span class="prompt">$</span> kb init</code></pre>
+            </figure>
+          </li>
+          <li>
+            <span class="step-num">Paso 03</span>
+            <p>Deja caer tu primera idea en la entrada y mira cómo se organiza.</p>
+          </li>
         </ol>
-        <div class="install-cmd-col">
-          <figure class="cmd">
-            <figcaption class="cmd-bar"><span>terminal</span><button class="copy" id="copyCmd" type="button">copiar</button></figcaption>
-            <pre><code id="cmdText"><span class="prompt">$</span> npm install -g kebel</code></pre>
-          </figure>
-          <div class="cta-row">
-            <a class="btn btn-primary" href="https://www.npmjs.com/package/kebel">Ver en npm →</a>
-            <a class="btn btn-ghost" href="https://github.com/dfosela/kebel#readme">Leer la documentación</a>
-          </div>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="https://www.npmjs.com/package/kebel-code">Ver en npm →</a>
+          <a class="btn btn-ghost" href="https://github.com/dfosela/kebel#readme">Leer la documentación</a>
         </div>
       </div>
     </div>

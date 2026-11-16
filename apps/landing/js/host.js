@@ -59,8 +59,14 @@
     if (!hero.classList.contains("is-revealed") && (e.key === "Escape" || e.key === "Enter") && mods[mode]) mods[mode].skip();
   });
   how.addEventListener("click", (e) => {
-    e.preventDefault(); if (leaving) return; leaving = true;
+    e.preventDefault();
+    if (mode === "2d") {
+      document.getElementById("flujo")?.scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
+      return;
+    }
+    if (leaving) return; leaving = true;
     const url = how.getAttribute("href");
+
     hero.classList.add("is-leaving");
     fade.classList.remove("light");
     if (mode === "3d" && mods["3d"] && !reduce) { mods["3d"].fly(url); return; }
