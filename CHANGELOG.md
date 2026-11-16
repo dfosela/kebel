@@ -6,6 +6,31 @@ Versionado semántico: MAJOR cuando algo rompe compatibilidad (formato de
 tarea/feature nueva (una card de `TASKS.md` completa), PATCH para fixes
 sin nueva funcionalidad.
 
+## [0.2.1] - 2026-11-02
+### Fixed
+- Bypass del gate de revisión vía negación en texto libre o JSON citado en
+  `verdictParser.js`.
+- `tddCheck.js` ya no bloquea borrados de archivos ni confía en el disco en
+  vez de en git.
+- Inyección de shell en el script del hook de pre-commit (`gitHooks.js`):
+  se escapa `binPath` antes de insertarlo.
+- URL de repo y mención a un comando inexistente corregidas en
+  `scaffold.js`.
+- `adr add`/`adr list` envueltos en try/catch en `cli.js`, igual que el
+  resto de comandos que mutan estado.
+- `runInit` ya no crashea sin capturar en detached HEAD.
+- `shell: true` ahora es condicional a Windows en `providerArgs.js`
+  (claude/codex/gemini).
+- `installPreCommitHook` hace backup y avisa antes de sobrescribir un hook
+  de pre-commit ajeno.
+### Added
+- Tests de cobertura para `kebelConfig.js`.
+### Changed
+- Deduplicada la invocación de proveedor repetida en
+  review/solomon/diffSummary/doctor (`buildProviderCall`).
+- Documentado el modelo de confianza procedimental del verdict store (sin
+  firma criptográfica).
+
 ## [0.2.0] - 2026-10-29
 
 ### Added
