@@ -33,12 +33,18 @@ export async function runInit({
   try {
     const { stdout: branchOut } = await runCapture('git', ['symbolic-ref', '--short', 'HEAD'], { cwd });
     baseBranch = branchOut.trim();
-  } catch {
-    const { stdout: shaOut } = await runCapture('git', ['rev-parse', '--short', 'HEAD'], { cwd });
-    baseBranch = shaOut.trim();
-    log(`⚠ HEAD está detached (sin rama); usando el commit ${baseBranch} como rama base.`);
+  } catch (err) {
+    if (err.stderr?.includes('not a git repository')) {
+      await run('git', ['init'], { cwd });
+      log('⚠ No había un repositorio git en este proyecto; se inicializó uno nuevo.');
+      const { stdout: branchOut } = await runCapture('git', ['symbolic-ref', '--short', 'HEAD'], { cwd });
+      baseBranch = branchOut.trim();
+    } else {
+      const { stdout: shaOut } = await runCapture('git', ['rev-parse', '--short', 'HEAD'], { cwd });
+      baseBranch = shaOut.trim();
+      log(`⚠ HEAD está detached (sin rama); usando el commit ${baseBranch} como rama base.`);
+    }
   }
-
   const config = { version: 1, roles, baseBranch };
   await saveConfig(config, cwd);
   log(

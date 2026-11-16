@@ -115,6 +115,47 @@ test('runInit falls back to the short commit sha as baseBranch on detached HEAD 
   });
 });
 
+test('runInit initializes git itself when the project is not yet a git repository, instead of crashing', async () => {
+  await withTempDir(async (cwd) => {
+    const runCalls = [];
+    const run = async (cmd, args) => {
+      if (cmd === 'git' && args[0] === 'init') { runCalls.push([cmd, ...args]); return; }
+      if (cmd === 'claude') return;
+      throw new Error('not found');
+    };
+    let symbolicRefCalls = 0;
+    const runCapture = async (cmd, args) => {
+      if (cmd === 'git' && args[0] === 'symbolic-ref') {
+        symbolicRefCalls += 1;
+        if (symbolicRefCalls === 1) {
+          throw Object.assign(new Error('git symbolic-ref --short HEAD exited with code 128'), {
+            code: 128,
+            stderr: 'fatal: not a git repository (or any of the parent directories): .git\n',
+          });
+        }
+        return { stdout: 'main\n', stderr: '' };
+      }
+      if (cmd === 'claude') return { stdout: 'pong', stderr: '' };
+      throw new Error(`unexpected runCapture call: ${cmd} ${args.join(' ')}`);
+    };
+    const ensureSqueezr = async () => ({ installed: true, configured: true });
+    const logs = [];
+
+    const config = await runInit({
+      run,
+      runCapture,
+      log: (m) => logs.push(m),
+      ensureSqueezr,
+      cwd,
+      installPreCommitHook: fakeInstallPreCommitHook([]),
+    });
+
+    assert.equal(config.baseBranch, 'main');
+    assert.deepEqual(runCalls, [['git', 'init']]);
+    assert.match(logs.join('\n'), /inicializ/i);
+  });
+});
+
 test('runInit is idempotent: a second run reports the existing config instead of overwriting it', async () => {
   await withTempDir(async (cwd) => {
     const run = async (cmd) => {
