@@ -72,6 +72,9 @@ test('runInit detects providers, assigns roles, writes config, runs Squeezr setu
     assert.match(logs.join('\n'), /AGENTS\.md/);
     assert.match(logs.join('\n'), /Bienvenido a Kebel/);
     assert.match(logs.join('\n'), /kb card/);
+    assert.match(logs.join('\n'), /IAs detectadas/);
+    assert.match(logs.join('\n'), /✓ Claude: lista/);
+    assert.match(logs.join('\n'), /○ ChatGPT \(Codex\): no instalada/);
 
     const saved = JSON.parse(await readFile(path.join(cwd, '.kebel', 'kebel.config.json'), 'utf8'));
     assert.equal(saved.roles.coder, 'claude');
