@@ -1,5 +1,6 @@
-import { detectProviders, assignRoles } from './config.js';
+import { assignRoles } from './config.js';
 import { loadConfig, saveConfig } from './kebelConfig.js';
+import { probeProviders, availableProviders, formatProviderReport } from './providerReport.js';
 import { ensureSqueezr as defaultEnsureSqueezr } from './squeezr.js';
 import { runCapture as defaultRunCapture } from './exec.js';
 import { installPreCommitHook as defaultInstallPreCommitHook } from './gitHooks.js';
@@ -25,7 +26,10 @@ export async function runInit({
     return existing;
   }
 
-  const available = await detectProviders({ run, runCapture });
+  const report = await probeProviders({ run, runCapture });
+  formatProviderReport(report).forEach((line) => log(line));
+  const available = availableProviders(report);
+
   const { warnings, ...roles } = assignRoles(available);
   warnings.forEach((warning) => log(`⚠ ${warning}`));
 
