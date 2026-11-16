@@ -6,6 +6,11 @@ Versionado semántico: MAJOR cuando algo rompe compatibilidad (formato de
 tarea/feature nueva (una card de `TASKS.md` completa), PATCH para fixes
 sin nueva funcionalidad.
 
+## [0.2.2] - 2026-11-16
+### Fixed
+- `kb init` ya no se rompe con un volcado de error de Node cuando la carpeta
+  todavía no es un repositorio git: ahora ejecuta `git init` y continúa.
+
 ## [0.2.1] - 2026-11-02
 ### Fixed
 - Bypass del gate de revisión vía negación en texto libre o JSON citado en
