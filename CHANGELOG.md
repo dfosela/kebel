@@ -14,6 +14,16 @@ sin nueva funcionalidad.
 - `kb init` propone qué IA hace cada rol y deja cambiarlo: Enter acepta la
   propuesta y también se puede escribir otra IA disponible. Sin terminal
   interactiva reparte por orden, como antes.
+- Si `kb init` se ejecuta sin una persona delante (por ejemplo, lo lanza un
+  asistente de IA), Kebel no decide: le pide a la IA que pregunte a su
+  usuario qué IAs añadir y qué IA quiere en cada rol.
+- `kb init --roles coder=<ia>,reviewer=<ia>,solomon=<ia>` aplica un reparto
+  sin preguntar. Un rol desconocido o una IA no disponible o repetida da un
+  error claro.
+### Fixed
+- Gemini salía siempre como no disponible con su CLI actual (0.68), que
+  rechaza `-p` sin valor. Los errores largos de una IA se recortan a una
+  línea.
 
 ## [0.3.0] - 2026-11-18
 ### Added
