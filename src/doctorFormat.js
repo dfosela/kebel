@@ -1,11 +1,13 @@
 const AUTH_ERROR_PATTERN = /(login|log in|logged in|auth|unauthoriz|api key|credential)/i;
+const MAX_REASON_LENGTH = 160;
 
 export function classifyProviderError(message) {
   if (AUTH_ERROR_PATTERN.test(message ?? '')) {
     return 'no parece estar logado (la CLI devolvió un error relacionado con autenticación)';
   }
   if (!message) return 'fallo desconocido al invocar la CLI';
-  return message.replace(/\s+/g, ' ').trim();
+  const oneLine = message.replace(/\s+/g, ' ').trim();
+  return oneLine.length > MAX_REASON_LENGTH ? `${oneLine.slice(0, MAX_REASON_LENGTH)}…` : oneLine;
 }
 
 export function formatDoctorReport(results) {

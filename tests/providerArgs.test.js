@@ -25,6 +25,14 @@ test('claude/codex/gemini need no shell outside Windows (npm installs them as pl
   }
 });
 
+// Gemini CLI 0.68 rejects a bare `-p` ("Not enough arguments following: p");
+// its -p value is appended to stdin, so a blank one leaves the stdin prompt intact.
+test('gemini gets a blank -p value so its CLI accepts the stdin prompt', () => {
+  const call = buildProviderCall('gemini', 'ping\nmultiline');
+  assert.deepEqual(call.args, ['-p', ' ']);
+  assert.equal(call.input, 'ping\nmultiline');
+});
+
 test('agy takes the prompt as an argv element, spawned without a shell (real .exe, avoids cmd.exe newline truncation)', () => {
   const invocation = getProviderInvocation('agy');
   assert.equal(invocation.promptVia, 'arg');

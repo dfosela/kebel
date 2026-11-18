@@ -14,7 +14,8 @@
 const PROVIDERS = {
   claude: { baseArgs: ['-p'], promptVia: 'stdin', shellOnlyOnWindows: true },
   codex: { baseArgs: ['exec'], promptVia: 'stdin', shellOnlyOnWindows: true },
-  gemini: { baseArgs: ['-p'], promptVia: 'stdin', shellOnlyOnWindows: true },
+  // Gemini CLI rejects a bare `-p`; its value is appended to stdin, so a blank one is neutral.
+  gemini: { baseArgs: ['-p', ' '], promptVia: 'stdin', shellOnlyOnWindows: true },
   agy: { baseArgs: ['-p'], promptVia: 'arg', shellOnlyOnWindows: false },
 };
 
