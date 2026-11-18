@@ -1,4 +1,4 @@
-import { assignRoles } from './config.js';
+import { chooseRoles as defaultChooseRoles } from './rolePicker.js';
 import { loadConfig, saveConfig } from './kebelConfig.js';
 import { setupProviders } from './providerLogin.js';
 import { ensureSqueezr as defaultEnsureSqueezr } from './squeezr.js';
@@ -17,6 +17,7 @@ export async function runInit({
   cwd = process.cwd(),
   binPath,
   reconfigure = false,
+  chooseRoles = defaultChooseRoles,
 }) {
   const existing = await loadConfig(cwd);
   if (existing && !reconfigure) {
@@ -46,7 +47,7 @@ export async function runInit({
   }
   const available = await setupProviders({ run, runCapture, log });
 
-  const { warnings, ...roles } = assignRoles(available);
+  const { warnings, ...roles } = await chooseRoles({ available, log });
   warnings.forEach((warning) => log(`⚠ ${warning}`));
 
 

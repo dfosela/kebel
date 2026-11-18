@@ -4,6 +4,7 @@ import { mkdtemp, rm, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { runInit } from '../src/init.js';
+import { chooseRoles } from '../src/rolePicker.js';
 
 async function withTempDir(fn) {
   const dir = await mkdtemp(path.join(tmpdir(), 'kebel-init-'));
@@ -219,6 +220,32 @@ test('runInit is idempotent: a second run reports the existing config instead of
 
     assert.deepEqual(first, second);
     assert.match(logs.join('\n'), /kb init --reconfigure/);
+  });
+});
+
+test('runInit lets the person pick the AI for each role', async () => {
+  await withTempDir(async (cwd) => {
+    const installed = ['claude', 'codex', 'agy'];
+    const run = async (cmd) => {
+      if (installed.includes(cmd)) return;
+      throw new Error('not found');
+    };
+    const runCapture = async (cmd, args) => {
+      if (cmd === 'git' && args[0] === 'symbolic-ref') return { stdout: 'main\n', stderr: '' };
+      if (installed.includes(cmd)) return { stdout: 'pong', stderr: '' };
+      throw new Error(`unexpected runCapture call: ${cmd} ${args.join(' ')}`);
+    };
+    const replies = ['', 'agy', ''];
+    const config = await runInit({
+      run,
+      runCapture,
+      log: () => {},
+      ensureSqueezr: async () => ({ installed: true, configured: true }),
+      cwd,
+      installPreCommitHook: fakeInstallPreCommitHook([]),
+      chooseRoles: (opts) => chooseRoles({ ...opts, isInteractive: true, ask: async () => replies.shift() ?? '' }),
+    });
+    assert.deepEqual([config.roles.coder, config.roles.reviewer, config.roles.solomon], ['claude', 'agy', 'codex']);
   });
 });
 

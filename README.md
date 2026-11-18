@@ -62,10 +62,16 @@ sobre-construyendo: hay que decirlo y simplificar antes de escribir código.
 
 ```sh
 npm install -g kebel-code
-kb --version
-kb --help
-kb setup
+kb init
 ```
+
+`kb init` crea el repositorio git si no existe, enseña qué IAs detecta
+(Claude, ChatGPT/Codex, Gemini, Antigravity) y por qué falta alguna, te
+ofrece iniciar sesión o instalar las que faltan, y propone qué IA hace cada
+rol: Enter acepta la propuesta y también puedes escribir otra.
+
+¿Has añadido una IA o quieres cambiar los roles? `kb init --reconfigure`
+lo repite sobre la configuración que ya tienes.
 
 ## Versionado
 
