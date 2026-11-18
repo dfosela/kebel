@@ -6,6 +6,15 @@ Versionado semántico: MAJOR cuando algo rompe compatibilidad (formato de
 tarea/feature nueva (una card de `TASKS.md` completa), PATCH para fixes
 sin nueva funcionalidad.
 
+## [0.4.0] - 2026-11-18
+### Added
+- `kb init --reconfigure`: vuelve a detectar las IAs y a repartir los roles
+  sobre una configuración existente, conservando la rama base guardada.
+  `kb init` sobre un proyecto ya inicializado explica cómo hacerlo.
+- `kb init` propone qué IA hace cada rol y deja cambiarlo: Enter acepta la
+  propuesta y también se puede escribir otra IA disponible. Sin terminal
+  interactiva reparte por orden, como antes.
+
 ## [0.3.0] - 2026-11-18
 ### Added
 - `kb init` muestra qué IAs detecta (Claude, ChatGPT/Codex, Gemini,
