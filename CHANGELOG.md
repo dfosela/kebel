@@ -6,6 +6,20 @@ Versionado semántico: MAJOR cuando algo rompe compatibilidad (formato de
 tarea/feature nueva (una card de `TASKS.md` completa), PATCH para fixes
 sin nueva funcionalidad.
 
+## [0.3.0] - 2026-11-18
+### Added
+- `kb init` muestra qué IAs detecta (Claude, ChatGPT/Codex, Gemini,
+  Antigravity) y, para cada una que falta, por qué: no instalada o sin
+  sesión iniciada.
+- `kb init` pregunta si quieres iniciar sesión en una IA instalada sin
+  sesión, o instalar por npm e iniciar sesión en las que no tienes, y vuelve
+  a comprobarlas antes de repartir los roles. Sin terminal interactiva solo
+  explica cómo añadirlas.
+### Fixed
+- Codex salía como no disponible en carpetas nuevas: `kb init` comprobaba las
+  IAs antes de crear el repositorio git, y Codex no funciona fuera de uno.
+- `npm publish` ya no avisa de que la ruta del comando `kb` no es válida.
+
 ## [0.2.2] - 2026-11-16
 ### Fixed
 - `kb init` ya no se rompe con un volcado de error de Node cuando la carpeta
