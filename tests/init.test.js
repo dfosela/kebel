@@ -214,8 +214,43 @@ test('runInit is idempotent: a second run reports the existing config instead of
     const installPreCommitHook = fakeInstallPreCommitHook([]);
 
     const first = await runInit({ run, runCapture, log: () => {}, ensureSqueezr, cwd, installPreCommitHook });
-    const second = await runInit({ run, runCapture, log: () => {}, ensureSqueezr, cwd, installPreCommitHook });
+    const logs = [];
+    const second = await runInit({ run, runCapture, log: (m) => logs.push(m), ensureSqueezr, cwd, installPreCommitHook });
 
     assert.deepEqual(first, second);
+    assert.match(logs.join('\n'), /kb init --reconfigure/);
+  });
+});
+
+test('runInit --reconfigure detects the AIs again and keeps the saved base branch', async () => {
+  await withTempDir(async (cwd) => {
+    let installed = ['claude'];
+    const run = async (cmd) => {
+      if (installed.includes(cmd)) return;
+      throw new Error('not found');
+    };
+    let branch = 'main\n';
+    const runCapture = async (cmd, args) => {
+      if (cmd === 'git' && args[0] === 'symbolic-ref') return { stdout: branch, stderr: '' };
+      if (installed.includes(cmd)) return { stdout: 'pong', stderr: '' };
+      throw new Error(`unexpected runCapture call: ${cmd} ${args.join(' ')}`);
+    };
+    const ensureSqueezr = async () => ({ installed: true, configured: true });
+    const installPreCommitHook = fakeInstallPreCommitHook([]);
+    const common = { run, runCapture, log: () => {}, ensureSqueezr, cwd, installPreCommitHook };
+
+    const first = await runInit(common);
+    assert.equal(first.roles.reviewer, null);
+
+    installed = ['claude', 'codex'];
+    branch = 'feat/some-task\n';
+    const second = await runInit({ ...common, reconfigure: true });
+
+    assert.equal(second.roles.coder, 'claude');
+    assert.equal(second.roles.reviewer, 'codex');
+    assert.equal(second.baseBranch, 'main');
+    const saved = JSON.parse(await readFile(path.join(cwd, '.kebel', 'kebel.config.json'), 'utf8'));
+    assert.equal(saved.roles.reviewer, 'codex');
+    assert.equal(saved.baseBranch, 'main');
   });
 });

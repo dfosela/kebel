@@ -19,7 +19,9 @@ const USAGE = `Usage: kb [command] [options]
 
 Commands:
   init            Detect AI providers, assign coder/reviewer/solomon roles and set up Squeezr
-  setup           Detect/install Squeezr and configure it as the default proxy
+  init --reconfigure
+                  On an existing setup: detect the AIs again and re-assign the roles
+  setup          Detect/install Squeezr and configure it as the default proxy
   review --staged Review the staged diff with the configured reviewer and record a verdict
   solomon         Arbitrate a rejected review verdict with the configured solomon provider
                   (refuses to run on a security finding — that is never overridable)
@@ -78,7 +80,7 @@ export async function runCli(
     return 0;
   }
   if (argv[0] === 'init') {
-    await runInit({ run, runCapture, log, ensureSqueezr, binPath });
+    await runInit({ run, runCapture, log, ensureSqueezr, binPath, reconfigure: argv.includes('--reconfigure') });
     return 0;
   }
   if (argv[0] === 'review' && argv.includes('--staged')) {
