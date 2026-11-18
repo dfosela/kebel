@@ -1,6 +1,7 @@
 import { ensureSqueezr as defaultEnsureSqueezr } from './squeezr.js';
 import { run as defaultRun, runCapture as defaultRunCapture } from './exec.js';
 import { runInit as defaultRunInit } from './init.js';
+import { parseRolesArg } from './rolePicker.js';
 import { reviewStaged as defaultReviewStaged } from './review.js';
 import { checkGitGate as defaultCheckGitGate } from './gitGate.js';
 import { checkTddGate as defaultCheckTddGate } from './tddCheck.js';
@@ -21,6 +22,8 @@ Commands:
   init            Detect AI providers, assign coder/reviewer/solomon roles and set up Squeezr
   init --reconfigure
                   On an existing setup: detect the AIs again and re-assign the roles
+  init --roles coder=<ai>,reviewer=<ai>,solomon=<ai>
+                  Assign the roles without asking (for an AI assistant relaying its user's choice)
   setup          Detect/install Squeezr and configure it as the default proxy
   review --staged Review the staged diff with the configured reviewer and record a verdict
   solomon         Arbitrate a rejected review verdict with the configured solomon provider
@@ -80,8 +83,23 @@ export async function runCli(
     return 0;
   }
   if (argv[0] === 'init') {
-    await runInit({ run, runCapture, log, ensureSqueezr, binPath, reconfigure: argv.includes('--reconfigure') });
-    return 0;
+    try {
+      const rolesAt = argv.indexOf('--roles');
+      const requestedRoles = rolesAt === -1 ? undefined : parseRolesArg(argv[rolesAt + 1] ?? '');
+      await runInit({
+        run,
+        runCapture,
+        log,
+        ensureSqueezr,
+        binPath,
+        reconfigure: argv.includes('--reconfigure'),
+        requestedRoles,
+      });
+      return 0;
+    } catch (error) {
+      log(`✗ ${error.message}`);
+      return 1;
+    }
   }
   if (argv[0] === 'review' && argv.includes('--staged')) {
     try {

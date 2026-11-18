@@ -47,11 +47,39 @@ test('kb init --reconfigure passes reconfigure to runInit, plain kb init does no
   assert.deepEqual(calls, [false, true]);
 });
 
+test('kb init --roles passes the parsed roles to runInit', async () => {
+  let received;
+  const fakeRunInit = async (opts) => { received = opts.requestedRoles; };
+  const stdout = { write: () => {} };
+  const code = await runCli(['init', '--reconfigure', '--roles', 'coder=codex,reviewer=claude'], {
+    version: '0.1.0',
+    stdout,
+    runInit: fakeRunInit,
+  });
+  assert.equal(code, 0);
+  assert.deepEqual(received, { coder: 'codex', reviewer: 'claude' });
+});
+
+test('kb init reports a bad --roles or an init failure as a clear error, exit 1', async () => {
+  let written = '';
+  const stdout = { write: (s) => { written += s; } };
+  const badArg = await runCli(['init', '--roles', 'boss=claude'], { version: '0.1.0', stdout, runInit: async () => {} });
+  assert.equal(badArg, 1);
+  assert.match(written, /✗ .*rol desconocido "boss"/);
+
+  written = '';
+  const failing = async () => { throw new Error('"gemini" no está disponible'); };
+  const initFails = await runCli(['init', '--roles', 'coder=gemini'], { version: '0.1.0', stdout, runInit: failing });
+  assert.equal(initFails, 1);
+  assert.match(written, /✗ "gemini" no está disponible/);
+});
+
 test('kb --help documents kb init --reconfigure', async () => {
   let written = '';
   const stdout = { write: (s) => { written += s; } };
   await runCli(['--help'], { version: '0.1.0', stdout });
   assert.match(written, /--reconfigure/);
+  assert.match(written, /--roles coder=<ai>,reviewer=<ai>,solomon=<ai>/);
 });
 
 test('kb init delegates to the injected runInit', async () => {
