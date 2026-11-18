@@ -17,6 +17,7 @@ export async function runInit({
   cwd = process.cwd(),
   binPath,
   reconfigure = false,
+  requestedRoles,
   chooseRoles = defaultChooseRoles,
 }) {
   const existing = await loadConfig(cwd);
@@ -47,7 +48,7 @@ export async function runInit({
   }
   const available = await setupProviders({ run, runCapture, log });
 
-  const { warnings, ...roles } = await chooseRoles({ available, log });
+  const { warnings, ...roles } = await chooseRoles({ available, log, requested: requestedRoles });
   warnings.forEach((warning) => log(`⚠ ${warning}`));
 
 
