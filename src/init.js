@@ -1,6 +1,6 @@
 import { assignRoles } from './config.js';
 import { loadConfig, saveConfig } from './kebelConfig.js';
-import { probeProviders, availableProviders, formatProviderReport } from './providerReport.js';
+import { setupProviders } from './providerLogin.js';
 import { ensureSqueezr as defaultEnsureSqueezr } from './squeezr.js';
 import { runCapture as defaultRunCapture } from './exec.js';
 import { installPreCommitHook as defaultInstallPreCommitHook } from './gitHooks.js';
@@ -26,13 +26,6 @@ export async function runInit({
     return existing;
   }
 
-  const report = await probeProviders({ run, runCapture });
-  formatProviderReport(report).forEach((line) => log(line));
-  const available = availableProviders(report);
-
-  const { warnings, ...roles } = assignRoles(available);
-  warnings.forEach((warning) => log(`⚠ ${warning}`));
-
   let baseBranch;
   try {
     const { stdout: branchOut } = await runCapture('git', ['symbolic-ref', '--short', 'HEAD'], { cwd });
@@ -49,6 +42,12 @@ export async function runInit({
       log(`⚠ HEAD está detached (sin rama); usando el commit ${baseBranch} como rama base.`);
     }
   }
+  const available = await setupProviders({ run, runCapture, log });
+
+  const { warnings, ...roles } = assignRoles(available);
+  warnings.forEach((warning) => log(`⚠ ${warning}`));
+
+
   const config = { version: 1, roles, baseBranch };
   await saveConfig(config, cwd);
   log(

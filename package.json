@@ -21,7 +21,7 @@
     "code-review"
   ],
   "bin": {
-    "kb": "./bin/kb.js"
+    "kb": "bin/kb.js"
   },
   "files": [
     "bin",

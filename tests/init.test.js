@@ -159,6 +159,46 @@ test('runInit initializes git itself when the project is not yet a git repositor
   });
 });
 
+// Codex refuses to run outside a git repository, so probing the AIs before
+// `git init` reported a logged-in Codex as unavailable in every new project.
+test('runInit initializes git before probing the AIs', async () => {
+  await withTempDir(async (cwd) => {
+    const order = [];
+    const run = async (cmd, args) => {
+      order.push(`${cmd} ${args[0]}`);
+      if (cmd === 'git' && args[0] === 'init') return;
+      if (cmd === 'claude') return;
+      throw new Error('not found');
+    };
+    let gitReady = false;
+    const runCapture = async (cmd, args) => {
+      if (cmd === 'git' && args[0] === 'symbolic-ref') {
+        if (!gitReady) {
+          gitReady = true;
+          throw Object.assign(new Error('exited with code 128'), {
+            code: 128,
+            stderr: 'fatal: not a git repository (or any of the parent directories): .git\n',
+          });
+        }
+        return { stdout: 'main\n', stderr: '' };
+      }
+      if (cmd === 'claude') return { stdout: 'pong', stderr: '' };
+      throw new Error(`unexpected runCapture call: ${cmd} ${args.join(' ')}`);
+    };
+
+    await runInit({
+      run,
+      runCapture,
+      log: () => {},
+      ensureSqueezr: async () => ({ installed: true, configured: true }),
+      cwd,
+      installPreCommitHook: fakeInstallPreCommitHook([]),
+    });
+
+    assert.ok(order.indexOf('git init') < order.indexOf('claude --version'), order.join(' | '));
+  });
+});
+
 test('runInit is idempotent: a second run reports the existing config instead of overwriting it', async () => {
   await withTempDir(async (cwd) => {
     const run = async (cmd) => {
