@@ -2,6 +2,14 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { classifyProviderError, formatDoctorReport, isDoctorHealthy } from '../src/doctorFormat.js';
 
+test('classifyProviderError cuts a long CLI error down to one short line', () => {
+  const helpDump = `Not enough arguments following: p ${'Usage: gemini [options] [command] '.repeat(40)}`;
+  const reason = classifyProviderError(helpDump);
+  assert.ok(reason.length <= 161, `got ${reason.length} chars`);
+  assert.match(reason, /^Not enough arguments following: p/);
+  assert.match(reason, /…$/);
+});
+
 test('classifyProviderError recognizes common authentication error phrasing', () => {
   assert.match(classifyProviderError('Error: not authenticated, please login'), /logado/i);
   assert.match(classifyProviderError('Invalid API key'), /logado/i);
