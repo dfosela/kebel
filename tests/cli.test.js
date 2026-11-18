@@ -38,6 +38,22 @@ test('kb setup delegates to the injected ensureSqueezr and prints its log lines'
   assert.match(written, /fake log line/);
 });
 
+test('kb init --reconfigure passes reconfigure to runInit, plain kb init does not', async () => {
+  const calls = [];
+  const fakeRunInit = async (opts) => { calls.push(opts.reconfigure); };
+  const stdout = { write: () => {} };
+  await runCli(['init'], { version: '0.1.0', stdout, runInit: fakeRunInit });
+  await runCli(['init', '--reconfigure'], { version: '0.1.0', stdout, runInit: fakeRunInit });
+  assert.deepEqual(calls, [false, true]);
+});
+
+test('kb --help documents kb init --reconfigure', async () => {
+  let written = '';
+  const stdout = { write: (s) => { written += s; } };
+  await runCli(['--help'], { version: '0.1.0', stdout });
+  assert.match(written, /--reconfigure/);
+});
+
 test('kb init delegates to the injected runInit', async () => {
   const calls = [];
   const fakeRunInit = async ({ log }) => {

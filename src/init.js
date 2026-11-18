@@ -16,13 +16,15 @@ export async function runInit({
   writeScaffoldFiles = defaultWriteScaffoldFiles,
   cwd = process.cwd(),
   binPath,
+  reconfigure = false,
 }) {
   const existing = await loadConfig(cwd);
-  if (existing) {
+  if (existing && !reconfigure) {
     log(
       `Kebel ya está inicializado en este proyecto (coder=${existing.roles.coder ?? '—'}, ` +
         `reviewer=${existing.roles.reviewer ?? '—'}, solomon=${existing.roles.solomon ?? '—'}).`,
     );
+    log('Para volver a detectar las IAs o cambiar los roles: kb init --reconfigure');
     return existing;
   }
 
@@ -48,11 +50,12 @@ export async function runInit({
   warnings.forEach((warning) => log(`⚠ ${warning}`));
 
 
-  const config = { version: 1, roles, baseBranch };
+  // A reconfigure can run from any feature branch: the base saved at setup stays.
+  const config = { version: 1, roles, baseBranch: existing?.baseBranch ?? baseBranch };
   await saveConfig(config, cwd);
   log(
     `Kebel inicializado. Roles: coder=${roles.coder ?? '—'}, reviewer=${roles.reviewer ?? '—'}, ` +
-      `solomon=${roles.solomon ?? '—'}. Rama base: ${baseBranch}.`,
+      `solomon=${roles.solomon ?? '—'}. Rama base: ${config.baseBranch}.`,
   );
 
   await ensureSqueezr({ run, log });
