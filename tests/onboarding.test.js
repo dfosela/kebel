@@ -10,6 +10,8 @@ test('buildOnboardingMessage explains each role and how work is tracked', () => 
   assert.match(message, /solomon \(codex\)/);
   assert.match(message, /kb review --staged/);
   assert.match(message, /kb card/);
+  assert.match(message, /TASKS\.md/);
+  assert.match(message, /Cola del usuario/);
   assert.match(message, /kb adr/);
   assert.match(message, /kb doctor/);
 });

@@ -70,6 +70,9 @@ export async function runInit({
   scaffoldResults
     .filter((result) => result.written)
     .forEach((result) => log(`Scaffold creado: ${result.filename}.`));
+  scaffoldResults
+    .filter((result) => result.rulesAdded)
+    .forEach((result) => log(`Reglas de trabajo con TASKS.md añadidas a ${result.filename}.`));
 
   await syncTasks({ cwd });
   log('TASKS.md listo: ahí ves las tareas del proyecto y puedes añadir las tuyas en "Cola del usuario".');
