@@ -81,6 +81,9 @@ test('runInit detects providers, assigns roles, writes config, runs Squeezr setu
     assert.equal(saved.roles.coder, 'claude');
     assert.equal(saved.roles.reviewer, 'agy');
     assert.equal(saved.baseBranch, 'main');
+
+    assert.match(await readFile(path.join(cwd, 'TASKS.md'), 'utf8'), /## Cola del usuario/);
+    assert.match(logs.join('\n'), /TASKS\.md/);
   });
 });
 

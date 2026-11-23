@@ -6,6 +6,7 @@ import { runCapture as defaultRunCapture } from './exec.js';
 import { installPreCommitHook as defaultInstallPreCommitHook } from './gitHooks.js';
 import { writeScaffoldFiles as defaultWriteScaffoldFiles } from './scaffold.js';
 import { buildOnboardingMessage } from './onboarding.js';
+import { syncTasks } from './tasksSync.js';
 
 export async function runInit({
   run,
@@ -69,6 +70,9 @@ export async function runInit({
   scaffoldResults
     .filter((result) => result.written)
     .forEach((result) => log(`Scaffold creado: ${result.filename}.`));
+
+  await syncTasks({ cwd });
+  log('TASKS.md listo: ahí ves las tareas del proyecto y puedes añadir las tuyas en "Cola del usuario".');
 
   log(buildOnboardingMessage({ roles }));
 

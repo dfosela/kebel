@@ -74,6 +74,26 @@ test('kb init reports a bad --roles or an init failure as a clear error, exit 1'
   assert.match(written, /✗ "gemini" no está disponible/);
 });
 
+test('kb card sync lists the tasks to review with what to do, or just confirms when there are none', async () => {
+  let written = '';
+  const stdout = { write: (s) => { written += s; } };
+  const syncTasks = async () => ({
+    cards: [{ id: 'a' }, { id: 'b' }],
+    toReview: [{ id: 'quiero-notificaciones', title: 'quiero notificaciones' }],
+  });
+  const code = await runCli(['card', 'sync'], { version: '0.1.0', stdout, syncTasks });
+  assert.equal(code, 0);
+  assert.match(written, /TASKS\.md sincronizado: 2 tareas/);
+  assert.match(written, /`quiero-notificaciones` — quiero notificaciones/);
+  assert.match(written, /divide las grandes/);
+  assert.match(written, /pregunta a tu usuario/i);
+
+  written = '';
+  await runCli(['card', 'sync'], { version: '0.1.0', stdout, syncTasks: async () => ({ cards: [], toReview: [] }) });
+  assert.match(written, /TASKS\.md sincronizado: 0 tareas/);
+  assert.doesNotMatch(written, /Por revisar/);
+});
+
 test('kb --help documents kb init --reconfigure', async () => {
   let written = '';
   const stdout = { write: (s) => { written += s; } };
