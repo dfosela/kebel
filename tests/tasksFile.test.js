@@ -54,6 +54,13 @@ test('parseTasksFile collects the queue as free text and keeps the header and un
   assert.match(extraSections, /## Notas\nEsto es mío, no son tareas\./);
 });
 
+test('parseTasksFile ignores a UTF-8 BOM saved by Windows editors, even right before a section', () => {
+  const bom = String.fromCharCode(0xfeff);
+  const { tasks, preamble } = parseTasksFile(`${bom}## Pendiente\n- [ ] \`a\` — Una\n`);
+  assert.deepEqual(tasks.map(({ id, status }) => [id, status]), [['a', 'pending']]);
+  assert.equal(preamble, '');
+});
+
 test('parseTasksFile reads the "(por revisar)" mark and ignores empty-section placeholders', () => {
   const { tasks, queue } = parseTasksFile(
     '## Pendiente\n_(vacía)_\n- [ ] `notif` — notificaciones _(por revisar)_\n\n## Cola del usuario\n_(vacía — escribe aquí lo que quieras)_\n',

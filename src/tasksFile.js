@@ -44,7 +44,9 @@ export function parseTasksFile(text) {
   let section = null;
   let lastTask = null;
 
-  for (const line of String(text).split(/\r?\n/)) {
+  const BOM = String.fromCharCode(0xfeff); // saved by some Windows editors
+  const body = String(text).startsWith(BOM) ? String(text).slice(1) : String(text);
+  for (const line of body.split(/\r?\n/)) {
     const heading = /^##\s+(.*)$/.exec(line);
     if (heading) {
       section = SECTIONS.find((s) => s.match.test(heading[1].trim().toLowerCase())) ?? 'extra';
