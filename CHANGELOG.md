@@ -6,6 +6,19 @@ Versionado semántico: MAJOR cuando algo rompe compatibilidad (formato de
 tarea/feature nueva (una card de `TASKS.md` completa), PATCH para fixes
 sin nueva funcionalidad.
 
+## [0.5.0] - 2026-11-23
+### Added
+- `TASKS.md`: `kb init` lo crea en la raíz del proyecto. Es la lista de tareas
+  que ve y edita la persona, sincronizada con las tarjetas de Kebel en los dos
+  sentidos: `kb card add/list/move` recogen antes los cambios hechos a mano y
+  lo dejan al día después.
+- Lo escrito en "Cola del usuario", o una línea añadida a mano sin id, pasa a
+  tarea "por revisar". Una línea borrada a mano pasa la tarea a Descartado.
+- `kb card sync`: recoge los cambios de `TASKS.md` y lista las tareas por
+  revisar con instrucciones para que la IA las reescriba, divida y ordene.
+- `AGENTS.md`/`CLAUDE.md` llevan las reglas de trabajo con `TASKS.md` para la
+  IA. En proyectos que ya los tenían, `kb init` las añade una sola vez.
+
 ## [0.4.0] - 2026-11-18
 ### Added
 - `kb init --reconfigure`: vuelve a detectar las IAs y a repartir los roles
