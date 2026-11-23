@@ -10,8 +10,12 @@ Bienvenido a Kebel. Así funciona en este proyecto:
 - solomon (${label(roles.solomon)}): arbitra solo si discrepas de un rechazo
   del reviewer ("kb solomon").
 
-Antes de cada commit: "kb review --staged". Las tareas se siguen con
-"kb card add/list/move", las decisiones de diseño con "kb adr add/list", y
-"kb doctor" da un diagnóstico completo del setup en cualquier momento.
+Las tareas están en TASKS.md: ahí ves qué se está haciendo y en qué orden, y
+puedes añadir las tuyas en "Cola del usuario". Tu IA las ordena y las mantiene
+al día con "kb card".
+
+Antes de cada commit: "kb review --staged". Las decisiones de diseño se
+guardan con "kb adr add/list", y "kb doctor" da un diagnóstico completo del
+setup en cualquier momento.
 `;
 }

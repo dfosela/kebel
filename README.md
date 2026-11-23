@@ -38,8 +38,9 @@ equipos/proyectos grandes que Kebel deliberadamente **no** replica, porque
 el público de Kebel no las necesita y cada una cuesta tokens,
 infraestructura o fricción de setup:
 
-- **Sin servidor ni dashboard** — las cards de Kebel viven en un `.kebel/cards.json`
-  plano (`kb card add/list/move`), no en un board compartido con backend.
+- **Sin servidor ni dashboard** — las tareas viven en `TASKS.md`, un markdown que
+  lees y editas tú, sincronizado con `.kebel/cards.json` (`kb card`), no en un board
+  compartido con backend.
 - **Sin RAG semántico ni base vectorial** — Kebel no indexa el repo, confía
   en que el modelo lea el código directamente.
 - **Sin Sonar/Semgrep/OSV-Scanner por defecto** — ni Docker como dependencia
@@ -72,6 +73,15 @@ rol: Enter acepta la propuesta y también puedes escribir otra.
 
 ¿Has añadido una IA o quieres cambiar los roles? `kb init --reconfigure`
 lo repite sobre la configuración que ya tienes.
+
+### Las tareas: `TASKS.md`
+
+`kb init` crea `TASKS.md`, donde ves qué se está haciendo y en qué orden. Tu IA
+reparte tu encargo en tareas y las hace por ese orden. Puedes editarlo a mano:
+escribe lo que quieras en "Cola del usuario", mueve líneas o marca `[x]`. Antes de
+cada tarea, tu IA ejecuta `kb card sync`, recoge tus cambios, reescribe y ordena lo
+nuevo, y te pregunta lo que no esté claro. Las reglas que sigue están en el
+`AGENTS.md`/`CLAUDE.md` que crea `kb init`.
 
 ## Versionado
 
