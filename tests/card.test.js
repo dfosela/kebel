@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, rm, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { addCard, listCards, moveCard, parseCardAddArgs, CARD_STATUSES } from '../src/card.js';
@@ -21,6 +21,22 @@ test('addCard derives the id from the title when none is given and defaults to p
     assert.equal(card.id, 'kb-doctor');
     assert.equal(card.status, 'pending');
     assert.equal(card.createdAt, '2026-08-18T00:00:00.000Z');
+  });
+});
+
+test('card commands first pick up hand edits in TASKS.md, then leave it up to date', async () => {
+  await withTempDir(async (cwd) => {
+    await addCard({ title: 'Login', id: 'login', cwd });
+    const file = path.join(cwd, 'TASKS.md');
+    await writeFile(file, (await readFile(file, 'utf8')).replace('Login', 'Login con Google'));
+
+    await addCard({ title: 'Perfil', id: 'perfil', cwd });
+    await moveCard({ id: 'login', status: 'running', cwd });
+
+    const text = await readFile(file, 'utf8');
+    assert.match(text, /## En curso\n- \[ \] `login` — Login con Google\n/);
+    assert.match(text, /## Pendiente\n- \[ \] `perfil` — Perfil\n/);
+    assert.deepEqual((await listCards({ cwd })).map(({ id }) => id), ['login', 'perfil']);
   });
 });
 

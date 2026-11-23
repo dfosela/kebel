@@ -1,4 +1,5 @@
 import { loadCards, saveCards } from './cardStore.js';
+import { syncTasks, writeTasks } from './tasksSync.js';
 import { slugify } from './adrFormat.js';
 
 export const CARD_STATUSES = ['pending', 'running', 'done', 'skipped'];
@@ -21,6 +22,7 @@ export function parseCardAddArgs(args) {
 }
 
 export async function addCard({ title, id, cwd = process.cwd(), now = () => new Date() }) {
+  await syncTasks({ cwd, now });
   const cards = await loadCards(cwd);
   const cardId = id || slugify(title);
   if (!cardId) {
@@ -31,17 +33,20 @@ export async function addCard({ title, id, cwd = process.cwd(), now = () => new 
   }
   const card = { id: cardId, title, status: 'pending', createdAt: now().toISOString() };
   await saveCards([...cards, card], cwd);
+  await writeTasks({ cwd });
   return card;
 }
 
 export async function listCards({ cwd = process.cwd() } = {}) {
-  return loadCards(cwd);
+  const { cards } = await syncTasks({ cwd });
+  return cards;
 }
 
 export async function moveCard({ id, status, cwd = process.cwd() }) {
   if (!CARD_STATUSES.includes(status)) {
     throw new Error(`Estado desconocido "${status}". Usa uno de: ${CARD_STATUSES.join(', ')}.`);
   }
+  await syncTasks({ cwd });
   const cards = await loadCards(cwd);
   const index = cards.findIndex((card) => card.id === id);
   if (index === -1) {
@@ -51,5 +56,6 @@ export async function moveCard({ id, status, cwd = process.cwd() }) {
   const next = [...cards];
   next[index] = updated;
   await saveCards(next, cwd);
+  await writeTasks({ cwd });
   return updated;
 }
