@@ -2,6 +2,7 @@ import { ensureSqueezr as defaultEnsureSqueezr } from './squeezr.js';
 import { run as defaultRun, runCapture as defaultRunCapture } from './exec.js';
 import { runInit as defaultRunInit } from './init.js';
 import { parseRolesArg } from './rolePicker.js';
+import { syncTasks as defaultSyncTasks } from './tasksSync.js';
 import { reviewStaged as defaultReviewStaged } from './review.js';
 import { checkGitGate as defaultCheckGitGate } from './gitGate.js';
 import { checkTddGate as defaultCheckTddGate } from './tddCheck.js';
@@ -36,6 +37,7 @@ Commands:
   card list       List every tracked card, in the order they were added
   card move <id> <status>
                   Move a card to pending/running/done/skipped
+  card sync       Pick up hand edits and the queue in TASKS.md, and list the tasks to review
   doctor          Diagnose the setup: git, config, every assigned AI provider
                   (login included, not just that the binary exists) and Squeezr
   git-gate-check  Internal: verify the last review verdict still matches the staged diff
@@ -66,6 +68,7 @@ export async function runCli(
     listCards = defaultListCards,
     moveCard = defaultMoveCard,
     runDoctor = defaultRunDoctor,
+    syncTasks = defaultSyncTasks,
     binPath,
   },
 ) {
@@ -174,6 +177,23 @@ export async function runCli(
     }
     cards.forEach((card) => log(`${card.id} [${card.status}] ${card.title}`));
     return 0;
+  }
+  if (argv[0] === 'card' && argv[1] === 'sync') {
+    try {
+      const { cards, toReview } = await syncTasks({});
+      log(`TASKS.md sincronizado: ${cards.length} tareas.`);
+      if (toReview.length > 0) {
+        log('Por revisar (escritas a mano o en la Cola del usuario):');
+        toReview.forEach((card) => log(`  - \`${card.id}\` — ${card.title}`));
+        log('Reescríbelas en TASKS.md: título claro con su id (`id` — título), divide las grandes en');
+        log('varias líneas con su propio id, quita "(por revisar)", ordénalas en Pendiente y vuelve a');
+        log('ejecutar kb card sync. Si alguna no está clara, pregunta a tu usuario antes.');
+      }
+      return 0;
+    } catch (error) {
+      log(`Error: ${error.message}`);
+      return 1;
+    }
   }
   if (argv[0] === 'card' && argv[1] === 'move') {
     const [, , id, status] = argv;
